@@ -34,7 +34,7 @@
 					an arbitrary project name. If
 					none is provided, default is used
 		  --url URL, -u URL     Enter the url for the cloud
-                                        volumes api service
+		  			volumes api service
 		  --secretkey SECRETKEY, -s SECRETKEY
 		                        Enter the cloud volumes secret-key
 		  --apikey APIKEY, -a APIKEY
