@@ -32,4 +32,5 @@ python cvs-keys.py
 	  --region REGION, -r REGION
        		                Enter the cloud volumes region
 #Step 3: Use cvs-aws.py as such:
-	python cvs-aws.py -h
+	python cvs-aws.py -h	#The --preview flag enables you to run commands non-impacfully before running it for real.
+				#--preview does not work for list commands, why would it though?
