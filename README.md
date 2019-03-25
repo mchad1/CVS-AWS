@@ -64,7 +64,7 @@ optional arguments:
                         snap*.
   --volume VOLUME, -v VOLUME
                         Enter a volume name to search for, names must be
-                        between 16 and 33 characters in length
+                        between 16 and 33 characters in length 
   --region REGION, -r REGION
                         Specify the region when performing creation
                         operations, specify only if different than that listed
