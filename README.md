@@ -13,14 +13,16 @@ usage: cvs-aws.py [-h]
 
     optional arguments:
     -h, --help            show this help message and exit
-    --oracleBackup
-    --oracleRevert
+    --oracleBackup        Automate Oracle backups using hotbackup mode and storage 
+                          snapshots which this program manages for you
+    --oracleRevert        Automate Oracle revovery using storage snapshots which 
+                          this program manages for you
     --snapCreate
     --snapDelete
-     --snapKeepByCount     Keep only the newest N snapshots, delete the rest for
+    --snapKeepByCount     Keep only the newest N snapshots, delete the rest for
                           given volumes
     --snapKeepByDays      Keep only the snapshots for X days, delete the rest
-                         for given volumes
+                          for given volumes
     --snapList
     --snapRevert
     --volCreate
