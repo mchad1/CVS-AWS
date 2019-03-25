@@ -30,15 +30,19 @@ usage: cvs-aws.py [-h]
 cvs-aws.py is used to issue commands to your NetApp Cloud Volumes Service on your behalf.
 
 optional arguments:
+
   -h, --help            show this help message and exit
+  
   --oracleBackup
+  
   --oracleRevert
+  
   --snapCreate
+  
   --snapDelete
-  --snapKeepByCount     Keep only the newest N snapshots, delete the rest for
-                        given volumes
-  --snapKeepByDays      Keep only the snapshots for X days, delete the rest
-                        for given volumes
+  
+  --snapKeepByCount     Keep only the newest N snapshots, delete the rest for given volumes
+  --snapKeepByDays      Keep only the snapshots for X days, delete the rest for given volumes
   --snapList
   --snapRevert
   --volCreate
