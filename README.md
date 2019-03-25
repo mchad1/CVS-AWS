@@ -2,7 +2,9 @@
 
 ### snapshots ###
 List snapshots (--snapList) for one to many volumes, and do so based on substring volumes names
+
 Delete one to many snapshots (--snapDelete)
+
 Create one to many snapshots (--snapCreate)
 Revert one to many volumes (--snapRevert) again based on the logic above
 
