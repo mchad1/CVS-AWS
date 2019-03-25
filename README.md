@@ -30,9 +30,9 @@
 		  -h, --help            show this help message and exit
 		  --project PROJECT, -p PROJECT
 		  			To enable use of multiple
-                                        Cloud Volume environments, enter
-                                        an arbitrary project name. If
-                                        none is provided, default is used
+					Cloud Volume environments, enter
+					an arbitrary project name. If
+					none is provided, default is used
 		  --url URL, -u URL     Enter the url for the cloud
                                         volumes api service
 		  --secretkey SECRETKEY, -s SECRETKEY
