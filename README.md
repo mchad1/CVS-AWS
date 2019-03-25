@@ -29,7 +29,7 @@
 		optional arguments:
 		  -h, --help            show this help message and exit
 		  --project PROJECT, -p PROJECT
-		                        To enable use of multiple
+		  			To enable use of multiple
                                         Cloud Volume environments, enter
                                         an arbitrary project name. If
                                         none is provided, default is used
