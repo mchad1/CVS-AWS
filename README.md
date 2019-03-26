@@ -13,18 +13,13 @@
 	access link for your CVS AWS account and take down the 
 	secretekey, apikey, api endpoint a.k.a. url, and region. 
 		
-	CVS-keys.py creates a json file recording the aforementioned
-        and stores them by project.
+	CVS-keys.py creates a json file recording the aforementioned and stores them 
+	by project.
 	
-	Take note, the apikey, secret key and url are unique to each
-	region.  As such,you will need to repeat this process for each 
-	region.  Assign each keypair, url and region to a unique project
-	name.
-
-	project is concept unique to csv-aws.py wherein multiple
-        keys may be referenced by csv-aws.py enabling the
-        administration of several accounts
-
+	Take note, the apikey, secret key and url are unique to each region. As such,you 
+	will need to repeat this process for each region. Assign each keypair, url and 
+	region to a unique project name.
+	
 	python cvs-keys.py
 		usage: cvs_keys.py [-h] [--project PROJECT] [--url URL]
        	            [--secretkey SECRETKEY] [--apikey APIKEY] [--region REGION]
