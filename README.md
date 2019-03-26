@@ -5,6 +5,9 @@
 	python 3+
 	python -m pip install argparse --upgrade
 	python -m pip install requests --upgrade
+	
+	(I found this link useful for accomplishing the above)
+	https://janikarhunen.fi/how-to-install-python-3-6-1-on-centos-7
 
 
 #Step 2: Authentication
