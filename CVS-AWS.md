@@ -1,6 +1,7 @@
 usage: cvs-aws.py [-h]
                  
-    (--oracleBackup | --oracleRevert | --snapCreate | --snapDelete | --snapKeepByCount | --snapKeepByDays | --snapList | --snapRevert | --volCreate | --volDelete | --volList)
+    (--oracleBackup | --oracleRevert | --snapCreate | --snapDelete | --snapKeepByCount 
+    | --snapKeepByDays | --snapList | --snapRevert | --volCreate | --volDelete | --volList)
                   [--project PROJECT] [--preview] [--Force] [--volPattern]
                   [--snapPattern] [--volume VOLUME] [--region REGION]
                   [--name NAME] [--gigabytes GIGABYTES]
@@ -28,6 +29,8 @@ usage: cvs-aws.py [-h]
     --volCreate
     --volDelete
     --volList
+    
+    
     --project PROJECT, -p PROJECT
                         Enter the project name to interact with, otherwise the
                         default project is selected
