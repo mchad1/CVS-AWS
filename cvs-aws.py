@@ -599,7 +599,7 @@ def snapDelete(
                                                        url = url,
                                                        volume = volume)
 
-        submit_snap_deletions(force = force,
+        submit_snap_deletions(
                               fs_map_hash = fs_map_hash,
                               fs_snap_hash = fs_snap_hash,
                               headers = headers,
@@ -618,7 +618,7 @@ def snapDelete(
                                                        url = url,
                                                        volume = volume)
 
-        submit_snap_deletions(force = force,
+        submit_snap_deletions(
                               fs_map_hash = fs_map_hash,
                               fs_snap_hash = fs_snap_hash,
                               headers = headers,
@@ -629,14 +629,13 @@ def snapDelete(
                               url = url) 
 
     elif name and volPattern and volume and force:
-        print(1)
         fs_snap_hash = snapshot_delete_shared_function(fs_map_hash = fs_map_hash, 
                                                        headers = headers, 
                                                        prettify = False,
                                                        region = region,
                                                        url = url,
                                                        volume = volume)
-        submit_snap_deletions(force = force,
+        submit_snap_deletions(
                               fs_map_hash = fs_map_hash,
                               fs_snap_hash = fs_snap_hash,
                               headers = headers,
@@ -662,19 +661,8 @@ def snapDelete(
                               url = url) 
 
     elif name and force:
-        fs_snap_hash = snapshot_delete_shared_function(fs_map_hash = fs_map_hash, 
-                                                       headers = headers, 
-                                                       prettify = False,
-                                                       region = region,
-                                                       url = url)
-        submit_snap_deletions(force = force,
-                              fs_map_hash = fs_map_hash,
-                              fs_snap_hash = fs_snap_hash,
-                              headers = headers,
-                              name = name,
-                              preview = preview,
-                              region = region,
-                              url = url) 
+        print('Error The snapDelete command resulted in an error:\t--volume flag missing')
+        snapDelete_error_message()
 
     elif volPattern and force and not volume:
         print('Error The snapDelete command resulted in an error:\t--volume flag missing')
@@ -1403,7 +1391,7 @@ def snapshot_extract_info(fs_map_hash = None, name = None, prettify = None, snap
 
 
 #Submit deletions here
-def submit_snap_deletions(Force = None,
+def submit_snap_deletions(
                           fs_map_hash = None,
                           fs_snap_hash = None,
                           headers = None,
@@ -1522,8 +1510,9 @@ def snapKeepByCount_error_message():
 def snapDelete_error_message():
     print('\nThe following snapshot deletion command line options are supported:\
            \n\tsnapDelete --name X --volume <volume> [--preview]\t\t\t#Delete Snapshot X from volume Y.\
+           \n\tsnapDelete --name X -snapPattern --volume <volume> --Force [--preview]\t\t\t#Delete Snapshot X from volume Y.\
            \n\tsnapDelete --name X --volume <volume> --volPattern --Force [--preview]\t#Delete Snapshot X from volumes with names containing Y.\
-           \n\tsnapDelete --name X --Force  [--preview]\t\t\t\t#Delete Snapshot X wherever it is found.')
+           \n\tsnapDelete --name X --snapPattern --volume <volume> --volPattern --Force [--preview]\t#Delete Snapshot X from volumes with names containing Y.')
     exit()
 
 
@@ -1579,7 +1568,6 @@ def oracle_hot_backup(configFile = None, fs_map_hash = None, headers = None, ora
     datavols, logvols = oracle_config_capture(configFile = configFile, fs_map_hash = fs_map_hash, oracleSid = oracleSid, project = project)
     #If we get this far, place the database in hot backup mode
     if not preview:
-        print('"alter database begin backup;" issued for oracle_sid %s' % (oracleSid))
         out=orautils.enter_hotbackupmode(oracleSid)
     else:
         print('"alter database begin backup;" simulated for oracle_sid %s' % (oracleSid))
@@ -1590,8 +1578,6 @@ def oracle_hot_backup(configFile = None, fs_map_hash = None, headers = None, ora
     #Take out of backup mode
     if not preview:
         out=orautils.leave_hotbackupmode(oracleSid)
-        print('"alter database end backup;" issued for oracle_sid %s' % (oracleSid))
-        print('"alter system archive log current;" issued for oracle_sid %s' % (oracleSid))
     else:
         print('"alter database end backup;" simulated for oracle_sid %s' % (oracleSid))
         print('"alter system archive log current;" simulated for oracle_sid %s' % (oracleSid))

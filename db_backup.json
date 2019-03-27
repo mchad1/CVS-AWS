@@ -9,15 +9,15 @@
             {
             "datavols":
                [
-               "long-name-chad-data3-3",
-               "long-name-chad-data3-1",
-               "long-name-chad-data3-5",
-               "long-name-chad-data3-2",
-               "long-name-chad-data3-4"
+               "oracledb-4",
+               "oracledb-3",
+               "oracledb-2",
+               "oracledb-1",
+               "oracledb-5"
                ],
             "logvols":
                [
-               "long-name-chad-log-1"
+               "oraclelog"
                ]
             }
          }

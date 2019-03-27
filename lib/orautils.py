@@ -179,6 +179,9 @@ def enter_hotbackupmode(oraclesid,**kwargs):
       if len(out['STDOUT']) is not 0:
          for line in out['STDOUT']:
             print(line)
+   else:
+      print('Oracle DB %s is not in not in archivelog mode, exit' % (oraclesid)) 
+      exit()
        
 def leave_hotbackupmode(oraclesid,**kwargs):
    try:
