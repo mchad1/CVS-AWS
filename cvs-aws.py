@@ -149,14 +149,16 @@ def command_line():
 
 
     #Oracle recover commands
-    if arg['oracleRevert'] and not arg['configFile'] and not arg['oracleSid'] and not arg['name']:
-        print('oracleRevert as well as configlFile, oracleSid and name <snapshot name> must be entered together, exiting') 
-        exit()
+    if arg['oracleRevert']:
+           if not arg['configFile'] or not arg['oracleSid'] or not arg['name']:
+                print('oracleRevert as well as configlFile, oracleSid and name <snapshot name> must be entered together, exiting') 
+                exit()
 
     #Oracle hot Backup Mode
-    if arg['oracleBackup'] and not arg['configFile'] and not arg['oracleSid']:
-        print('oracleBackup as well as configlFile and oracleSid muct be entered together, exiting') 
-        exit()
+    if arg['oracleBackup']:
+        if not arg['configFile'] or not arg['oracleSid']:
+            print('oracleBackup as well as configlFile and oracleSid muct be entered together, exiting') 
+            exit()
 
       
 
@@ -262,7 +264,7 @@ def command_line():
     elif arg['oracleBackup']:
         oracle_hot_backup(configFile = configFile, fs_map_hash = fs_map_hash, headers = headers, oracleSid = oracleSid, preview = preview, project = project, region = region, url = url)
     elif arg['oracleRevert']:
-        oracle_recover_database(configFile = configFile, fs_map_hash = fs_map_hash, headers = headers, name = name, oracleSid = oracleSid, preview = preview, project = project, region = region, url = url)
+        oracle_revert_database(configFile = configFile, fs_map_hash = fs_map_hash, headers = headers, name = name, oracleSid = oracleSid, preview = preview, project = project, region = region, url = url)
         
         ##########################################################
         #                      Volume Commands
@@ -1577,6 +1579,7 @@ def oracle_hot_backup(configFile = None, fs_map_hash = None, headers = None, ora
     datavols, logvols = oracle_config_capture(configFile = configFile, fs_map_hash = fs_map_hash, oracleSid = oracleSid, project = project)
     #If we get this far, place the database in hot backup mode
     if not preview:
+        print('"alter database begin backup;" issued for oracle_sid %s' % (oracleSid))
         out=orautils.enter_hotbackupmode(oracleSid)
     else:
         print('"alter database begin backup;" simulated for oracle_sid %s' % (oracleSid))
@@ -1587,6 +1590,8 @@ def oracle_hot_backup(configFile = None, fs_map_hash = None, headers = None, ora
     #Take out of backup mode
     if not preview:
         out=orautils.leave_hotbackupmode(oracleSid)
+        print('"alter database end backup;" issued for oracle_sid %s' % (oracleSid))
+        print('"alter system archive log current;" issued for oracle_sid %s' % (oracleSid))
     else:
         print('"alter database end backup;" simulated for oracle_sid %s' % (oracleSid))
         print('"alter system archive log current;" simulated for oracle_sid %s' % (oracleSid))
@@ -1594,7 +1599,7 @@ def oracle_hot_backup(configFile = None, fs_map_hash = None, headers = None, ora
     snapCreate( fs_map_hash = fs_map_hash, headers = headers, name = oracleSid + '-' + str(now) ,preview = preview, region = region, url = url, volume_list = logvols)
 
 ##Oracle Recover Function
-def oracle_recover_database(configFile = None, fs_map_hash = None, headers = None, latest = None, name = None, oracleSid = None, preview = None, project = None, region = None, url = None):
+def oracle_revert_database(configFile = None, fs_map_hash = None, headers = None, latest = None, name = None, oracleSid = None, preview = None, project = None, region = None, url = None):
     #Capture the volumes from the config file
     datavols, logvols = oracle_config_capture(configFile = configFile, fs_map_hash = fs_map_hash, oracleSid = oracleSid, project = project)
     #If we get this far, shutdown the database using abort

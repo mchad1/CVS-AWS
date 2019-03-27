@@ -1,30 +1,22 @@
 {
-#Do not change
 "project" :
    {
-   #This the project created usng cvs-key.py
    "chad" :
       {
-      #Do not change
       "oraclesid" :
          {
-         #Enter the Oracle SID here
          "proof":
             {
-	    #Do not change, data volumes go below
             "datavols":
                [
-               #A List of all of the volumes used for dbf files
                "long-name-chad-data3-3",
                "long-name-chad-data3-1",
                "long-name-chad-data3-5",
                "long-name-chad-data3-2",
                "long-name-chad-data3-4"
                ],
-            #Do not change, log volumes go below
             "logvols":
                [
-               #A List of all of the volumes used for log files
                "long-name-chad-log-1"
                ]
             }
