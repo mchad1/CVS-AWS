@@ -71,21 +71,20 @@ def command_line():
     group.add_argument('--volCreate',action='store_const',const=True,)
     group.add_argument('--volDelete',action='store_const',const=True,)
     group.add_argument('--volList', action='store_const',const=True,)
-    parser.add_argument('--project','-p',type=str,help='Enter the project name to interact with, otherwise the default project is selected')
+    parser.add_argument('--project','-p',type=str,help='Enter the project snapshot to interact with, otherwise the default project is selected')
     parser.add_argument('--preview', action='store_const',const=True,help='If specfied, a try befor your buy simulation is run rather than\
                                                                          the actual command. Supports all delete and create and Oracle commands.')
     parser.add_argument('--Force', action='store_const',const=True,help='If specfied, enables substring\'s to work *Delete and Revert\
                                                                          operations. Supports all *Delete operations as well as snapRevert.')
-    parser.add_argument('--volPattern','-P',action='store_const',const=True,help='Search for volumes using name as substring.\
+    parser.add_argument('--volPattern','-P',action='store_const',const=True,help='Search for volumes using snapshot as substring.\
                                                                                Supports snapList and volList nativley, snapDelete\
                                                                                and volDelete as well as snapRevert with --Force.\n\n')
-    parser.add_argument('--snapPattern','-S',action='store_const',const=True,help='Search for snapshots using name as substring.\
+    parser.add_argument('--snapPattern','-S',action='store_const',const=True,help='Search for snapshots using snapshot as substring.\
                                                                                Supports snap*.\n\n')
-    parser.add_argument('--volume','-v', type=str,help='Enter a volume name to search for, names must be between 16 and 33 characters in length' )
+    parser.add_argument('--volume','-v', type=str,help='Enter a volume snapshot to search for, snapshots must be between 16 and 33 characters in length' )
     parser.add_argument('--region','-r',type=str,help='Specify the region when performing creation operations, specify only if different than that\
                                                        listed already in the aws_cvs_config.json file. Supports snapCreate and volCreate')
-    parser.add_argument('--name','-n',type=str,help='Specify the object name to create.  Supports snap* and volCreate. When used with volCreate,\
-                                                     body must match [a-zA-Z][a-zA-Z0-9-] and be 16 - 33 character long')
+    parser.add_argument('--snapshot','-n',type=str,help='Specify the object snapshot to create.  Supports snap*')
     parser.add_argument('--gigabytes','-g',type=str,help='Volume gigabytes in Gigabytes, value accepted between 1 and 100,000. Supports volCreate')
     parser.add_argument('--bandwidth','-b',type=str,help='Volume bandwidth requirements in Megabytes per second. If unknown enter 0 and maximum\
                                                      bandwidth is assigned. Supports volCreate')
@@ -150,8 +149,8 @@ def command_line():
 
     #Oracle recover commands
     if arg['oracleRevert']:
-           if not arg['configFile'] or not arg['oracleSid'] or not arg['name']:
-                print('oracleRevert as well as configlFile, oracleSid and name <snapshot name> must be entered together, exiting') 
+           if not arg['configFile'] or not arg['oracleSid'] or not arg['snapshot']:
+                print('oracleRevert as well as configlFile, oracleSid and snapshot <snapshot snapshot> must be entered together, exiting') 
                 exit()
 
     #Oracle hot Backup Mode
@@ -162,19 +161,19 @@ def command_line():
 
       
 
-    if arg['snapPattern'] and not arg['name']:
-        print('snapPattern has been entered without specifiying --name, exiting') 
+    if arg['snapPattern'] and not arg['snapshot']:
+        print('snapPattern has been entered without specifiying --snapshot, exiting') 
         exit()
-    elif arg['snapPattern'] and arg['name']:
+    elif arg['snapPattern'] and arg['snapshot']:
         snapPattern = arg['snapPattern']
-        name = arg['name']
+        snapshot = arg['snapshot']
     else:
         snapPattern = None
 
-    if arg['name']:
-        name = arg['name']
+    if arg['snapshot']:
+        snapshot = arg['snapshot']
     else:
-        name = None
+        snapshot = None
 
     #Use the region specified in the command line if present, otherwise go with that returned in the config file
     if arg['region']:
@@ -233,7 +232,7 @@ def command_line():
                     status_code = volume_status,
                     url = url)
 
-        #@# Map filesystem ids to names
+        #@# Map filesystem ids to snapshots
         if arg['volume'] and not arg['volPattern']:
             fs_map_hash = create_export_to_fsid_hash(filesystems = [arg['volume']], json_object = json_volume_object, region = region)
         elif arg['volume'] and arg['volPattern']:
@@ -252,19 +251,19 @@ def command_line():
     elif arg['volDelete']:
         volDelete( force = force,fs_map_hash = fs_map_hash,headers = headers, preview = preview, region = region, url = url, volPattern = volPattern, volume = volume)
     elif arg['snapList']:     
-        snapList( force = force, fs_map_hash = fs_map_hash, headers = headers, json_volume_object = json_volume_object, name = name, region = region, url = url, volPattern = volPattern, snapPattern = snapPattern, volume = volume)
+        snapList( force = force, fs_map_hash = fs_map_hash, headers = headers, json_volume_object = json_volume_object, snapshot = snapshot, region = region, url = url, volPattern = volPattern, snapPattern = snapPattern, volume = volume)
     elif arg['snapCreate']:
-        snapCreate( force = force, fs_map_hash = fs_map_hash, headers = headers, name = name, preview = preview, region = region, url = url, volPattern = volPattern, volume = volume)
+        snapCreate( force = force, fs_map_hash = fs_map_hash, headers = headers, snapshot = snapshot, preview = preview, region = region, url = url, volPattern = volPattern, volume = volume)
     elif arg['snapDelete']:
-        snapDelete( force = force, fs_map_hash = fs_map_hash, headers = headers, name = name, preview = preview, region = region, snapPattern = snapPattern, url = url, volPattern = volPattern, volume = volume)
+        snapDelete( force = force, fs_map_hash = fs_map_hash, headers = headers, snapshot = snapshot, preview = preview, region = region, snapPattern = snapPattern, url = url, volPattern = volPattern, volume = volume)
     elif arg['snapKeepByCount'] or arg['snapKeepByDays']:
-        snapKeepByStar(count = count, force = force, fs_map_hash = fs_map_hash, headers = headers, name = name, preview = preview, region = region, snapPattern = snapPattern, snapKeepByDays = snapKeepByDays, snapKeepByCount = snapKeepByCount, url = url, volPattern = volPattern, volume = volume)
+        snapKeepByStar(count = count, force = force, fs_map_hash = fs_map_hash, headers = headers, snapshot = snapshot, preview = preview, region = region, snapPattern = snapPattern, snapKeepByDays = snapKeepByDays, snapKeepByCount = snapKeepByCount, url = url, volPattern = volPattern, volume = volume)
     elif arg['snapRevert']:
-        snapRevert(force = force, fs_map_hash = fs_map_hash, headers = headers, name = name, preview = preview, region = region, url = url, volPattern = volPattern, volume = volume)
+        snapRevert(force = force, fs_map_hash = fs_map_hash, headers = headers, snapshot = snapshot, preview = preview, region = region, url = url, volPattern = volPattern, volume = volume)
     elif arg['oracleBackup']:
         oracle_hot_backup(configFile = configFile, fs_map_hash = fs_map_hash, headers = headers, oracleSid = oracleSid, preview = preview, project = project, region = region, url = url)
     elif arg['oracleRevert']:
-        oracle_revert_database(configFile = configFile, fs_map_hash = fs_map_hash, headers = headers, name = name, oracleSid = oracleSid, preview = preview, project = project, region = region, url = url)
+        oracle_revert_database(configFile = configFile, fs_map_hash = fs_map_hash, headers = headers, snapshot = snapshot, oracleSid = oracleSid, preview = preview, project = project, region = region, url = url)
         
         ##########################################################
         #                      Volume Commands
@@ -290,7 +289,7 @@ def volList(
         volList_error_message()
     elif len(fs_map_hash) > 0:
         #@# print and capture info for specific volumes
-        vol_hash = extract_fs_info_for_vols_by_name(fs_map_hash = fs_map_hash,
+        vol_hash = extract_fs_info_for_vols_by_snapshot(fs_map_hash = fs_map_hash,
                                                     json_object = json_volume_object,
                                                     headers = headers,
                                                     region = region, 
@@ -330,15 +329,15 @@ def volCreate(
    
             if len(volume) < 1:
                 error = True
-                error_value['name_length'] = ('Volume Name length is too short: %s, names must be => 1 and <= 33 characters' % (len(volume)))
+                error_value['snapshot_length'] = ('Volume Name length is too short: %s, snapshots must be => 1 and <= 33 characters' % (len(volume)))
             if len(volume) > 33:
                 error = True
-                error_value['name_length'] = ('Volume Name length is too long: %s, names must be => 1 and <= 33 characters' % (len(volume)))
+                error_value['snapshot_length'] = ('Volume Name length is too long: %s, snapshots must be => 1 and <= 33 characters' % (len(volume)))
             for index in range(0,len(volume)):
                 local_error = is_ord(my_string = volume[index], position = index)
                 if local_error == True:
                     error = True
-                    error_value['name_illegal_character'] = 'Illegal char type'
+                    error_value['snapshot_illegal_character'] = 'Illegal char type'
             local_error = is_number(gigabytes)
             if local_error == True:
                 error = True
@@ -380,12 +379,12 @@ def volCreate(
                                     url = url)
                 else:
                     while count > 0:
-                        newname = ('%s-%s' % (volume,count))
+                        newsnapshot = ('%s-%s' % (volume,count))
                         volume_creation(bandwidth = bandwidthMB,
                                         cidr = cidr,
                                         headers = headers,
                                         label = label,
-                                        volume = newname,
+                                        volume = newsnapshot,
                                         preview = preview,
                                         quota_in_bytes = quotainbytes,
                                         region = region,
@@ -418,7 +417,7 @@ def volProtect(fs_map_hash = None):
         print('\n')
         exit()
 
-#Volume delete does not support volPattern matching or empty sets, a volume name must be entered
+#Volume delete does not support volPattern matching or empty sets, a volume snapshot must be entered
 def volDelete(
             force = None,	
             fs_map_hash = None,	
@@ -474,7 +473,7 @@ def snapList(
             fs_map_hash = None,
             headers = None,
             json_volume_object = None,
-            name = None,
+            snapshot = None,
             region = None,
             url = None,
             volPattern = None,
@@ -485,7 +484,7 @@ def snapList(
     #Get a list of all volumes matching inputted -volume and --volPattern if specified, or alternativley all volumes
 
     #@# capture snapshot infor for volumes
-    if snapPattern and not name:
+    if snapPattern and not snapshot:
         print('The snapList command resulted in an error:\tCommand line parameter --snapPattern requires --volume <volume>')
         snapList_error_message()
     if volPattern and not volume:
@@ -500,10 +499,10 @@ def snapList(
                 print('The snapList command resulted in an error:\tNo volumes exist matching --volume substring %s region %s.' % (volume,region))
             elif volume:
                 print('The snapList command resulted in an error:\tNo volumes exist matching --volume %s in region %s.' % (volume,region))
-            elif name and not snapPattern:
-                print('The snapList command resulted in an error:\tNo snapshots exist matching --name %s in region %s.' % (name,region))
-            elif name and snapPattern:
-                print('The snapList command resulted in an error:\tNo snapshots exist matching the pattern --name %s in region %s.' % (name,region))
+            elif snapshot and not snapPattern:
+                print('The snapList command resulted in an error:\tNo snapshots exist matching --snapshot %s in region %s.' % (snapshot,region))
+            elif snapshot and snapPattern:
+                print('The snapList command resulted in an error:\tNo snapshots exist matching the pattern --snapshot %s in region %s.' % (snapshot,region))
             else: 
                 print('The snapList command resulted in an error:\tNo volumes exist in region %s.' % (region))
             exit()
@@ -521,26 +520,26 @@ def snapList(
                                url = url)
 
             #@# print snapshots for selected volumes
-            snapshot_extract_info(fs_map_hash = fs_map_hash, name = name, prettify = True, snap_hash = json_snapshot_object, snapPattern = snapPattern)
+            snapshot_extract_info(fs_map_hash = fs_map_hash, snapshot = snapshot, prettify = True, snap_hash = json_snapshot_object, snapPattern = snapPattern)
 
 def snapCreate(
                force = None,
                fs_map_hash = None,
                headers = None,
-               name = None,
                preview = None,
                region = None,
+               snapshot = None,
                url = None,
                volPattern = None,
                volume = None,
                volume_list = None
                ):
-    if name:
+    if snapshot:
         if force:
             print('The snapCreate command resulted in an error.\tThe --Force flag is not supported.')
             snapCreate_error_message()
         elif volume and not volPattern or volume and volPattern or not volume and not volPattern:
-            data = {'region':region,'name':name}
+            data = {'region':region,'name':snapshot}
             if len(fs_map_hash) > 0:
                 for volume in fs_map_hash.keys():
                     if volume_list and volume in volume_list or not volume_list:
@@ -556,9 +555,9 @@ def snapCreate(
                             error_check(body = json_snapshot_object,
                                         status_code = snapshot_status,
                                         url = url)
-                            print('Snapshot Creation submitted:\n\tvolume:%s:\n\tname:%s' % (volume,name))
+                            print('Snapshot Creation submitted:\n\tvolume:%s:\n\tsnapshot:%s' % (volume,snapshot))
                         else:
-                            print('Snapshot Creation simulated:\n\tvolume:%s:\n\tname:%s' % (volume,name))
+                            print('Snapshot Creation simulated:\n\tvolume:%s:\n\tsnapshot:%s' % (volume,snapshot))
                 #exit()
                  
             else:
@@ -571,7 +570,7 @@ def snapCreate(
                 #exit()
 
     else:
-        print('The snapCreate command resulted in an error.\tThe required flag --name name was not specified.')
+        print('The snapCreate command resulted in an error.\tThe required flag --snapshot snapshot was not specified.')
         snapCreate_error_message()
         
 
@@ -580,7 +579,7 @@ def snapDelete(
                force = None,
                fs_map_hash = None,
                headers = None,
-               name = None,
+               snapshot = None,
                preview = None,
                region = None,
                snapPattern = None,
@@ -590,7 +589,7 @@ def snapDelete(
               ):
 
     #snapDelete Code
-    if name and snapPattern and volume and volPattern and force:
+    if snapshot and snapPattern and volume and volPattern and force:
         fs_snap_hash = snapshot_delete_shared_function(fs_map_hash = fs_map_hash, 
                                                        headers = headers, 
                                                        prettify = False,
@@ -602,14 +601,14 @@ def snapDelete(
                               fs_map_hash = fs_map_hash,
                               fs_snap_hash = fs_snap_hash,
                               headers = headers,
-                              name = name,
+                              snapshot = snapshot,
                               preview = preview,
                               region = region,
                               snapPattern = snapPattern,
                               volPattern = volPattern,
                               url = url) 
 
-    if name and snapPattern and volume and force:
+    if snapshot and snapPattern and volume and force:
         fs_snap_hash = snapshot_delete_shared_function(fs_map_hash = fs_map_hash, 
                                                        headers = headers, 
                                                        prettify = False,
@@ -621,13 +620,13 @@ def snapDelete(
                               fs_map_hash = fs_map_hash,
                               fs_snap_hash = fs_snap_hash,
                               headers = headers,
-                              name = name,
+                              snapshot = snapshot,
                               preview = preview,
                               region = region,
                               snapPattern = snapPattern,
                               url = url) 
 
-    elif name and volPattern and volume and force:
+    elif snapshot and volPattern and volume and force:
         fs_snap_hash = snapshot_delete_shared_function(fs_map_hash = fs_map_hash, 
                                                        headers = headers, 
                                                        prettify = False,
@@ -638,13 +637,13 @@ def snapDelete(
                               fs_map_hash = fs_map_hash,
                               fs_snap_hash = fs_snap_hash,
                               headers = headers,
-                              name = name,
+                              snapshot = snapshot,
                               preview = preview,
                               region = region,
                               volPattern = volPattern,
                               url = url) 
 
-    elif name and volume and not snapPattern:
+    elif snapshot and volume and not snapPattern:
         fs_snap_hash = snapshot_delete_shared_function(fs_map_hash = fs_map_hash, 
                                                        headers = headers, 
                                                        prettify = False,
@@ -654,12 +653,12 @@ def snapDelete(
         submit_snap_deletions(fs_map_hash = fs_map_hash,
                               fs_snap_hash = fs_snap_hash,
                               headers = headers,
-                              name = name,
+                              snapshot = snapshot,
                               preview = preview,
                               region = region,
                               url = url) 
 
-    elif name and force:
+    elif snapshot and force:
         print('Error The snapDelete command resulted in an error:\t--volume flag missing')
         snapDelete_error_message()
 
@@ -671,20 +670,20 @@ def snapDelete(
         print('The snapDelete command resulted in an error:\tIncorrect Command line')
         snapDelete_error_message()
 
-    elif name and volPattern and volume and not force: 
+    elif snapshot and volPattern and volume and not force: 
         print('Error The snapDelete command resulted in an error:\t--Force flag missing')
         snapDelete_error_message()
-    elif name and volPattern and not volume and force: 
+    elif snapshot and volPattern and not volume and force: 
         print('Error The snapDelete command resulted in an error:\t--Force flag missing and --volume missing')
         snapDelete_error_message()
-    elif name and snapPattern and not force: 
+    elif snapshot and snapPattern and not force: 
         print('Error The snapDelete command resulted in an error:\t--Force flag missing')
         snapDelete_error_message()
-    elif name and not volume and not force: 
+    elif snapshot and not volume and not force: 
         print('Error The snapDelete command resulted in an error:\t--Force flag missing')
         snapDelete_error_message()
     else:
-        print('The snapDelete command resulted in an error:\tThe required flag --name name was not specified.')
+        print('The snapDelete command resulted in an error:\tThe required flag --snapshot snapshot was not specified.')
         snapDelete_error_message()
 
 
@@ -693,7 +692,7 @@ def snapKeepByStar(
                force = None,
                fs_map_hash = None,
                headers = None,
-               name = None,
+               snapshot = None,
                preview = None,
                region = None,
                snapPattern = None,
@@ -734,12 +733,12 @@ def snapKeepByStar(
         else:
             print('The snapKeepByCount command resulted in an error:\tThe --snapKeepByCount flag requires --force and --count <int> in conjunction with --volume.')
             snapKeepByCount_error_message()
-    if snapKeepByDays and name and not snapPattern:
+    if snapKeepByDays and snapshot and not snapPattern:
         if snapKeepByDays:
-            print('The snapKeepByDays command resulted in an error:\tCommand line parameter --name <name> requires --snapPattern')
+            print('The snapKeepByDays command resulted in an error:\tCommand line parameter --snapshot <snapshot> requires --snapPattern')
             snapKeepByDays_error_message()
         else:
-            print('The snapKeepByCount command resulted in an error:\tCommand line parameter --name <name> requires --snapPattern')
+            print('The snapKeepByCount command resulted in an error:\tCommand line parameter --snapshot <snapshot> requires --snapPattern')
             snapKeepByCount_error_message()
     elif volume and not volPattern or volume and volPattern and force or force :
         fs_snap_hash = snapshot_delete_shared_function(fs_map_hash = fs_map_hash, 
@@ -753,24 +752,24 @@ def snapKeepByStar(
             for volume in fs_snap_hash.keys():
                 fileSystemId = fs_map_hash[volume]['fileSystemId']
                 epoch_and_snap_id_hash = {}
-                epoch_and_snap_name_hash = {}
+                epoch_and_snap_snapshot_hash = {}
                 epoch_list = []
                 #Record the number of snapshots in the volume
                 for index in range(0,len(fs_snap_hash[volume]['snapshots'])):
-                    #If snapPattern is specified and name is in the snapshot, load the snapshot into the hashes, don't track the rest
-                    if snapPattern and name in fs_snap_hash[volume]['snapshots'][index]['name']:
+                    #If snapPattern is specified and snapshot is in the snapshot, load the snapshot into the hashes, don't track the rest
+                    if snapPattern and snapshot in fs_snap_hash[volume]['snapshots'][index]['snapshot']:
                         #key = epoch, value = snapid
                         epoch_and_snap_id_hash[fs_snap_hash[volume]['snapshots'][index]['epochTime']] = fs_snap_hash[volume]['snapshots'][index]['snapshotId']
-                        #key = epoch, value = name
-                        epoch_and_snap_name_hash[fs_snap_hash[volume]['snapshots'][index]['epochTime']] = fs_snap_hash[volume]['snapshots'][index]['name']
+                        #key = epoch, value = snapshot
+                        epoch_and_snap_snapshot_hash[fs_snap_hash[volume]['snapshots'][index]['epochTime']] = fs_snap_hash[volume]['snapshots'][index]['snapshot']
                         #list of epoch
                         epoch_list.append(fs_snap_hash[volume]['snapshots'][index]['epochTime'])
                     #If snapPattern is not specified, load all snapshots into the two hashes
                     elif not snapPattern:
                         #key = epoch, value = snapid
                         epoch_and_snap_id_hash[fs_snap_hash[volume]['snapshots'][index]['epochTime']] = fs_snap_hash[volume]['snapshots'][index]['snapshotId']
-                        #key = epoch, value = name
-                        epoch_and_snap_name_hash[fs_snap_hash[volume]['snapshots'][index]['epochTime']] = fs_snap_hash[volume]['snapshots'][index]['name']
+                        #key = epoch, value = snapshot
+                        epoch_and_snap_snapshot_hash[fs_snap_hash[volume]['snapshots'][index]['epochTime']] = fs_snap_hash[volume]['snapshots'][index]['snapshot']
                         #list of epoch
                         epoch_list.append(fs_snap_hash[volume]['snapshots'][index]['epochTime'])
                 #Sort the epoch list in place
@@ -783,7 +782,7 @@ def snapKeepByStar(
                     for index in range(0,len(epoch_list)):
                         if index >= count:
                             volume
-                            snapshotName = epoch_and_snap_name_hash[epoch_list[index]]
+                            snapshotName = epoch_and_snap_snapshot_hash[epoch_list[index]]
                             snapshotId = epoch_and_snap_id_hash[epoch_list[index]]
                             timeEpoch = epoch_list[index]
                             print('Deleteing: Volume: %s  VolId: %s SnapName: %s SnapID: %s Time: %s' % (volume,
@@ -809,7 +808,7 @@ def snapKeepByStar(
                     for index in range(0,len(epoch_list)):
                         if epoch_list[index] < epochSafeToDelete:
                             volume
-                            snapshotName = epoch_and_snap_name_hash[epoch_list[index]]
+                            snapshotName = epoch_and_snap_snapshot_hash[epoch_list[index]]
                             snapshotId = epoch_and_snap_id_hash[epoch_list[index]]
                             timeEpoch = epoch_list[index]
                             print('Deleteing: Volume: %s  VolId: %s SnapName: %s SnapID: %s Time: %s' % (volume,
@@ -831,7 +830,7 @@ def snapRevert(
                force = None,
                fs_map_hash = None,
                headers = None,
-               name = None,
+               snapshot = None,
                preview = None,
                region = None,
                url = None,
@@ -839,7 +838,7 @@ def snapRevert(
                volume = None,
                volume_list = None 
                ):
-    if name:
+    if snapshot:
         if volPattern  and  force and not volume:
             print('The snapRevert command resulted in an error:\tThe --volPattern flag requires both --volume <substring> and --Force.')
             snapRevert_error_message()
@@ -867,9 +866,9 @@ def snapRevert(
                             status_code = snapshot_status,
                             url = url)
     
-                #@# print snapshots for selected volumes based on volume name
+                #@# print snapshots for selected volumes based on volume snapshot
                 fs_snap_hash = snapshot_extract_info(fs_map_hash = fs_map_hash,
-                                                     name = name,
+                                                     snapshot = snapshot,
                                                      prettify = False,
                                                      snap_hash = json_snapshot_object)
                 tracking_reversions = 0
@@ -877,7 +876,7 @@ def snapRevert(
                     for volume in fs_snap_hash.keys():
                         if volume_list and volume in volume_list or not volume_list:
                             for index in range(0,len(fs_snap_hash[volume]['snapshots'])):
-                                if fs_snap_hash[volume]['snapshots'][index]['name'] == name:
+                                if fs_snap_hash[volume]['snapshots'][index]['snapshot'] == snapshot:
                                     snapshotId = fs_snap_hash[volume]['snapshots'][index]['snapshotId']
                                     fileSystemId = fs_map_hash[volume]['fileSystemId']
                                     command = 'FileSystems/' + fileSystemId + '/Revert'
@@ -894,17 +893,17 @@ def snapRevert(
                                         error_check(body = json_snapshot_object,
                                                     status_code = snapshot_status,
                                                     url = url)
-                                        print('Snapshot Revert submitted for snapshot %s:\n\tvolume:%s\n\tsnapshot:%s' % (name,volume,snapshotId))
+                                        print('Snapshot Revert submitted for snapshot %s:\n\tvolume:%s\n\tsnapshot:%s' % (snapshot,volume,snapshotId))
                                     else:
-                                        print('Snapshot Revert simulated for snapshot %s:\n\tvolume:%s\n\tsnapshot:%s' % (name,volume,snapshotId))
+                                        print('Snapshot Revert simulated for snapshot %s:\n\tvolume:%s\n\tsnapshot:%s' % (snapshot,volume,snapshotId))
                                     tracking_reversions += 1 
                     if tracking_reversions == 0 and preview == False:
-                        print('The snapRevert command resulted in zero volume reversions: :\tNo volumes contained snapshot %s' % (name))
+                        print('The snapRevert command resulted in zero volume reversions: :\tNo volumes contained snapshot %s' % (snapshot))
         else:
-            print('The snapRevert command resulted in an error:\tThe required flag --name requires additional options.')
+            print('The snapRevert command resulted in an error:\tThe required flag --snapshot requires additional options.')
             snapRevert_error_message()
     else:
-        print('The snapRevert command resulted in an error:\tThe required flag --name name was not specified.')
+        print('The snapRevert command resulted in an error:\tThe required flag --snapshot snapshot was not specified.')
         snapRevert_error_message()
    
 
@@ -982,9 +981,9 @@ def error_check(status_code = None, body = None, url = None):
 
 '''
 get the hash of file system ids associated with creation tokens
-key == export name
+key == export snapshot
 value == [filesystem id, index position inside base json object]
-return == hash of export names : [filesystem id, index position]
+return == hash of export snapshots : [filesystem id, index position]
 '''
 def create_export_to_fsid_hash(filesystems = None, json_object = None, region = None):
     fs_map_hash = {}
@@ -1030,7 +1029,7 @@ def pretty_hash(my_hash=None):
 if there is an fs_hash (which is a mapping of specific volumes to query,
 extract full volume info for those volumes, otherwise get info for all
 '''
-def extract_fs_info_for_vols_by_name(fs_map_hash = None,
+def extract_fs_info_for_vols_by_snapshot(fs_map_hash = None,
                                      json_object = None,
                                      headers = None,
                                      region = None,
@@ -1038,7 +1037,7 @@ def extract_fs_info_for_vols_by_name(fs_map_hash = None,
     fs_hash = {}
     for mount in fs_map_hash.keys():
         fs_hash[mount] = {}
-        add_fs_info_for_vols_by_name(fs_hash = fs_hash,
+        add_fs_info_for_vols_by_snapshot(fs_hash = fs_hash,
                                      fs_map_hash = fs_map_hash,
                                      json_object = json_object,
                                      headers = headers,
@@ -1051,7 +1050,7 @@ def extract_fs_info_for_vols_by_name(fs_map_hash = None,
 Helper function to extract attributes about each volume,
 this function call extract_mount_target_info to get the ip address associated
 '''
-def add_fs_info_for_vols_by_name(fs_hash = None,
+def add_fs_info_for_vols_by_snapshot(fs_hash = None,
                                  fs_map_hash = None,
                                  json_object = None,
                                  headers = None,
@@ -1061,7 +1060,7 @@ def add_fs_info_for_vols_by_name(fs_hash = None,
     for attribute in json_object[fs_map_hash[mount]['index']].keys():
        fs_hash[mount][attribute] = json_object[fs_map_hash[mount]['index']][attribute]
        if attribute == 'fileSystemId':
-           extract_mount_target_info_for_vols_by_name(fs_hash = fs_hash,
+           extract_mount_target_info_for_vols_by_snapshot(fs_hash = fs_hash,
                                                       fileSystemId = fs_hash[mount][attribute],
                                                       headers = headers,
                                                       mount = mount,
@@ -1262,19 +1261,19 @@ def cidr_rule_check(cidr=None):
 def volList_error_message():
     print('\nThe following vol list command line options are supported:\
            \n\tvolList --volume <volume>\t\t\t#Return information about volume X\
-           \n\tvolList --volume <volume> --volPattern\t#Return information about volumes with names containing substring X\
-           \n\tvolList\t\t\t\t\t\t#Return information about volumes with names containing substring X')
+           \n\tvolList --volume <volume> --volPattern\t#Return information about volumes with snapshots containing substring X\
+           \n\tvolList\t\t\t\t\t\t#Return information about volumes with snapshots containing substring X')
     exit()
 
 def volCreate_error_message():
     print('\nThe following volCreate flags are required:\
-           \n\t--name | -n X\t\t\t\t#Name used for volume and export path\
+           \n\t--snapshot | -n X\t\t\t\t#Name used for volume and export path\
            \n\t--gigabytes | -g [0 < X <= 100,000]\t#Allocated volume capacity in Gigabyte\
            \n\t--bandwidth | -b [0 <= X <= 4500]\t#Requested maximum volume bandwidth in Megabytes\
            \n\t--cidr | -c 0.0.0.0/0\t\t\t#Network with acess to exported volume')
     print('\nThe following flags are optional:\
            \n\t--count | -C [ 1 <= X]\t\t\t#If specified, X volumes will be created,\
-           \n\t\t\t\t\t\t#Curent count will be appended to each volume name\
+           \n\t\t\t\t\t\t#Curent count will be appended to each volume snapshot\
            \n\t\t\t\t\t\t#The artifacts of the required flags will be applied to each volume')
     print('\t--label | -l\t\t\t\t#Additional metadata for the volume(s)')
     print('\t--preview\t\t\t\t#results is a simulated rather than actual volume creation')
@@ -1282,8 +1281,8 @@ def volCreate_error_message():
 
 def volDelete_error_message():
     print('\nThe following vol deletion command line options are supported:\
-           \n\tvolDelete --name X --volume <volume> [--preview]\t\t\t#Delete volume X\
-           \n\tvolDelete --name X --volume <volume> --volPattern --Force [--preview]\t#Delete volumes with names containing substring X')
+           \n\tvolDelete --snapshot X --volume <volume> [--preview]\t\t\t#Delete volume X\
+           \n\tvolDelete --snapshot X --volume <volume> --volPattern --Force [--preview]\t#Delete volumes with snapshots containing substring X')
     exit()
 
 ##########################################################
@@ -1293,7 +1292,7 @@ def volDelete_error_message():
 '''
 Add mount target information for each volume fsid passed in
 '''
-def extract_mount_target_info_for_vols_by_name(fs_hash = None,
+def extract_mount_target_info_for_vols_by_snapshot(fs_hash = None,
                                                fileSystemId = None,
                                                headers = None,
                                                mount = None,
@@ -1335,7 +1334,7 @@ return the output in form as follows
         "fileSystemId": "75a59fcc-7254-2f32-ba7c-c790b469bc48",
         "snapshots": [
             {
-                "name": "snappy",
+                "snapshot": "snappy",
                 "snapshotId": "bdb723bf-5d72-5e95-b4ef-bb0d0e24ce72",
                 "usedBytes": 136
             }
@@ -1343,13 +1342,13 @@ return the output in form as follows
     }
 }
 '''
-def snapshot_extract_info(fs_map_hash = None, name = None, prettify = None, snap_hash = None, snapPattern = None):
+def snapshot_extract_info(fs_map_hash = None, snapshot = None, prettify = None, snap_hash = None, snapPattern = None):
     fs_snap_hash = {}
     for mount in fs_map_hash.keys():
         for index in range(0,len(snap_hash)):
             if snap_hash[index]['fileSystemId'] == fs_map_hash[mount]['fileSystemId']:
-                if snapPattern and name:
-                    if snapPattern and name in snap_hash[index]['name']:
+                if snapPattern and snapshot:
+                    if snapPattern and snapshot in snap_hash[index]['name']:
                         '''
                         Only work with snapshots in 'available' state
                         '''
@@ -1360,7 +1359,7 @@ def snapshot_extract_info(fs_map_hash = None, name = None, prettify = None, snap
                                 fs_snap_hash[mount]['fileSystemId'] = fs_map_hash[mount]['fileSystemId']
                                 fs_snap_hash[mount]['snapshots'] = []
                             fs_snap_hash[mount]['snapshots'].append(snap_hash[index])
-                elif not snapPattern and not name:
+                elif not snapPattern and not snapshot:
                     '''
                     Only work with snapshots in 'available' state
                     '''
@@ -1371,7 +1370,7 @@ def snapshot_extract_info(fs_map_hash = None, name = None, prettify = None, snap
                             fs_snap_hash[mount]['fileSystemId'] = fs_map_hash[mount]['fileSystemId']
                             fs_snap_hash[mount]['snapshots'] = []
                         fs_snap_hash[mount]['snapshots'].append(snap_hash[index])
-                elif name and name == snap_hash[index]['name']:
+                elif snapshot and snapshot == snap_hash[index]['name']:
                     '''
                     Only work with snapshots in 'available' state
                     '''
@@ -1395,7 +1394,7 @@ def submit_snap_deletions(
                           fs_map_hash = None,
                           fs_snap_hash = None,
                           headers = None,
-                          name = None,
+                          snapshot = None,
                           preview = None,
                           region = None,
                           snapPattern = None,
@@ -1406,7 +1405,7 @@ def submit_snap_deletions(
         for volume in fs_snap_hash.keys():
             #Use this to record if we actually deleted any snapshots
             for index in range(0,len(fs_snap_hash[volume]['snapshots'])):
-                if name == fs_snap_hash[volume]['snapshots'][index]['name'] or snapPattern and name in  fs_snap_hash[volume]['snapshots'][index]['name']:
+                if snapshot == fs_snap_hash[volume]['snapshots'][index]['snapshot'] or snapPattern and snapshot in  fs_snap_hash[volume]['snapshots'][index]['snapshot']:
                     snapshotId = fs_snap_hash[volume]['snapshots'][index]['snapshotId']
                     fileSystemId = fs_map_hash[volume]['fileSystemId']
                     command = 'FileSystems/' + fileSystemId + '/Snapshots/' + snapshotId
@@ -1421,18 +1420,18 @@ def submit_snap_deletions(
                         error_check(body = json_snapshot_object,
                                     status_code = snapshot_status,
                                     url = url)
-                        print('Snapshot Deleton Submitted: Volume: %s  VolId: %s SnapName: %s SnapID: %s' % (volume, fileSystemId, fs_snap_hash[volume]['snapshots'][index]['name'], snapshotId))
+                        print('Snapshot Deleton Submitted: Volume: %s  VolId: %s SnapName: %s SnapID: %s' % (volume, fileSystemId, fs_snap_hash[volume]['snapshots'][index]['snapshot'], snapshotId))
                     else:
-                        print('Snapshot Deleton Simulated: Volume: %s  VolId: %s SnapName: %s SnapID: %s' % (volume, fileSystemId, fs_snap_hash[volume]['snapshots'][index]['name'], snapshotId))
+                        print('Snapshot Deleton Simulated: Volume: %s  VolId: %s SnapName: %s SnapID: %s' % (volume, fileSystemId, fs_snap_hash[volume]['snapshots'][index]['snapshot'], snapshotId))
                     tracking_deletions += 1 
         exit()
     if tracking_deletions == 0:
-        print('The snapDelete command resulted in zero deletions: :\tNo volumes contained snapshot %s' % (name))
+        print('The snapDelete command resulted in zero deletions: :\tNo volumes contained snapshot %s' % (snapshot))
     exit()
 
 def snapshot_delete_shared_function(fs_map_hash = None,
                                     headers = None,
-                                    name = None,
+                                    snapshot = None,
                                     prettify = None,
                                     region = None,
                                     snapPattern = None,
@@ -1460,9 +1459,9 @@ def snapshot_delete_shared_function(fs_map_hash = None,
                     status_code = snapshot_status,
                     url = url)
 
-        #@# print snapshots for selected volumes based on volume name
+        #@# print snapshots for selected volumes based on volume snapshot
         fs_snap_hash = snapshot_extract_info(fs_map_hash = fs_map_hash,
-                                             name = name,
+                                             snapshot = snapshot,
                                              prettify = False,
                                              snap_hash = json_snapshot_object,
                                              snapPattern = snapPattern)
@@ -1471,30 +1470,30 @@ def snapshot_delete_shared_function(fs_map_hash = None,
 def snapList_error_message():
     print('\nThe following snapshot list command line options are supported:\
            \n\tsnapList --volume <volume>\t\t\t#List all snapshots for specified volume.\
-           \n\tsnapList --volume <volume> --volPattern\t#List all snapshot from volumes with names containing Y.\
+           \n\tsnapList --volume <volume> --volPattern\t#List all snapshot from volumes with snapshots containing Y.\
            \n\tsnapList\t\t\t\t#List all snapshot accross all volumes.')
     exit()
 
 def snapCreate_error_message():
     print('\nThe following snapshot creation command line options are supported:\
-           \n\tsnapCreate --name X --volume <volume> [--preview]\t\t#Create snapshot X on volume Y.\
-           \n\tsnapCreate --name X --volume <volume> --volPattern [--preview]\t#Create snapshot X on volumes with names containing substring Y.\
-           \n\tsnapCreate --name X [--preview]\t\t\t\t#Create snapshot X on all volumes.')
+           \n\tsnapCreate --snapshot X --volume <volume> [--preview]\t\t#Create snapshot X on volume Y.\
+           \n\tsnapCreate --snapshot X --volume <volume> --volPattern [--preview]\t#Create snapshot X on volumes with snapshots containing substring Y.\
+           \n\tsnapCreate --snapshot X [--preview]\t\t\t\t#Create snapshot X on all volumes.')
     exit()
     
 def snapRevert_error_message():
     print('\nThe following snapshot reversion command line options are supported:\
-           \n\tsnapRevert --name X --volume <volume> [--preview]\t\t\t#Revert to Snapshot X for volume Y.\
-           \n\tsnapRevert --name X --volume <volume> --volPattern --Force [--preview]\t#Revert to snapshot X for volumes with names containing Y.\
-           \n\tsnapRevert --name X --Force  [--preview]\t\t\t\t#Revert to snapshot X wherever it is found.')
+           \n\tsnapRevert --snapshot X --volume <volume> [--preview]\t\t\t#Revert to Snapshot X for volume Y.\
+           \n\tsnapRevert --snapshot X --volume <volume> --volPattern --Force [--preview]\t#Revert to snapshot X for volumes with snapshots containing Y.\
+           \n\tsnapRevert --snapshot X --Force  [--preview]\t\t\t\t#Revert to snapshot X wherever it is found.')
     exit()
 
 def snapKeepByDays_error_message():
     print('\nThe following snapKeepByDays command line options are supported:\
            \n\tsnapKeepByDays --volume <volume> --count --Force[--preview]\t\t\t\t\t#Keep the newest --count Snapshots, Delete the remaining snapshots Y for volume --volume.\
            \n\tsnapKeepByDays --volume <volume> --count --volPattern --Force[--preview]\t\t\t#Keep the newest --count Snapshots, Delete the remaining snapshot for pattern matched volumes.\
-           \n\tsnapKeepByDays --volume <volume> --count --volPattern --snapPattern --name --Force[--preview]\t#Keep the newest --count Snapshots pattern matched based on --name.\
-           \n\t\t\t\t\t\t\t\t\t\t\t\t\t#Delete the remaining snapshots also pattern matched based on --name.\
+           \n\tsnapKeepByDays --volume <volume> --count --volPattern --snapPattern --snapshot --Force[--preview]\t#Keep the newest --count Snapshots pattern matched based on --snapshot.\
+           \n\t\t\t\t\t\t\t\t\t\t\t\t\t#Delete the remaining snapshots also pattern matched based on --snapshot.\
            \n\t\t\t\t\t\t\t\t\t\t\t\t\t#These operations occur against volumes pattern matched based on --volume')
     exit()
 
@@ -1502,17 +1501,17 @@ def snapKeepByCount_error_message():
     print('\nThe following snapKeepByCount command line options are supported:\
            \n\tsnapKeepByCount --volume <volume> --count --Force[--preview]\t\t\t\t\t#Keep the newest --count Snapshots, Delete the remaining snapshots Y for volume --volume.\
            \n\tsnapKeepByCount --volume <volume> --count --volPattern --Force[--preview]\t\t\t#Keep the newest --count Snapshots, Delete the remaining snapshot for pattern matched volumes.\
-           \n\tsnapKeepByCount --volume <volume> --count --volPattern --snapPattern --name --Force[--preview]\t#Keep the newest --count Snapshots pattern matched based on --name.\
-           \n\t\t\t\t\t\t\t\t\t\t\t\t\t#Delete the remaining snapshots also pattern matched based on --name.\
+           \n\tsnapKeepByCount --volume <volume> --count --volPattern --snapPattern --snapshot --Force[--preview]\t#Keep the newest --count Snapshots pattern matched based on --snapshot.\
+           \n\t\t\t\t\t\t\t\t\t\t\t\t\t#Delete the remaining snapshots also pattern matched based on --snapshot.\
            \n\t\t\t\t\t\t\t\t\t\t\t\t\t#These operations occur against volumes pattern matched based on --volume')
     exit()
 
 def snapDelete_error_message():
     print('\nThe following snapshot deletion command line options are supported:\
-           \n\tsnapDelete --name X --volume <volume> [--preview]\t\t\t#Delete Snapshot X from volume Y.\
-           \n\tsnapDelete --name X -snapPattern --volume <volume> --Force [--preview]\t\t\t#Delete Snapshot X from volume Y.\
-           \n\tsnapDelete --name X --volume <volume> --volPattern --Force [--preview]\t#Delete Snapshot X from volumes with names containing Y.\
-           \n\tsnapDelete --name X --snapPattern --volume <volume> --volPattern --Force [--preview]\t#Delete Snapshot X from volumes with names containing Y.')
+           \n\tsnapDelete --snapshot X --volume <volume> [--preview]\t\t\t#Delete Snapshot X from volume Y.\
+           \n\tsnapDelete --snapshot X -snapPattern --volume <volume> --Force [--preview]\t\t\t#Delete Snapshot X from volume Y.\
+           \n\tsnapDelete --snapshot X --volume <volume> --volPattern --Force [--preview]\t#Delete Snapshot X from volumes with snapshots containing Y.\
+           \n\tsnapDelete --snapshot X --snapPattern --volume <volume> --volPattern --Force [--preview]\t#Delete Snapshot X from volumes with snapshots containing Y.')
     exit()
 
 
@@ -1574,7 +1573,7 @@ def oracle_hot_backup(configFile = None, fs_map_hash = None, headers = None, ora
 
     #Create Snapshots of data volumes
     now = date_to_epoch(now = True)
-    snapCreate( fs_map_hash = fs_map_hash, headers = headers, name = oracleSid + '-' + str(now) ,preview = preview, region = region, url = url, volume_list = datavols)
+    snapCreate( fs_map_hash = fs_map_hash, headers = headers, snapshot = oracleSid + '-' + str(now) ,preview = preview, region = region, url = url, volume_list = datavols)
     #Take out of backup mode
     if not preview:
         out=orautils.leave_hotbackupmode(oracleSid)
@@ -1582,10 +1581,10 @@ def oracle_hot_backup(configFile = None, fs_map_hash = None, headers = None, ora
         print('"alter database end backup;" simulated for oracle_sid %s' % (oracleSid))
         print('"alter system archive log current;" simulated for oracle_sid %s' % (oracleSid))
     #Create Snapshots of log volumes
-    snapCreate( fs_map_hash = fs_map_hash, headers = headers, name = oracleSid + '-' + str(now) ,preview = preview, region = region, url = url, volume_list = logvols)
+    snapCreate( fs_map_hash = fs_map_hash, headers = headers, snapshot = oracleSid + '-' + str(now) ,preview = preview, region = region, url = url, volume_list = logvols)
 
 ##Oracle Recover Function
-def oracle_revert_database(configFile = None, fs_map_hash = None, headers = None, latest = None, name = None, oracleSid = None, preview = None, project = None, region = None, url = None):
+def oracle_revert_database(configFile = None, fs_map_hash = None, headers = None, latest = None, snapshot = None, oracleSid = None, preview = None, project = None, region = None, url = None):
     #Capture the volumes from the config file
     datavols, logvols = oracle_config_capture(configFile = configFile, fs_map_hash = fs_map_hash, oracleSid = oracleSid, project = project)
     #If we get this far, shutdown the database using abort
@@ -1594,7 +1593,7 @@ def oracle_revert_database(configFile = None, fs_map_hash = None, headers = None
     else: 
         print('"shutdown abort;" simulated for oracle_sid %s' % (oracleSid))
     #Revert the data volumes
-    snapRevert(force = True, fs_map_hash = fs_map_hash, headers = headers, name = name, preview = preview, region = region, url = url, volume_list = datavols)
+    snapRevert(force = True, fs_map_hash = fs_map_hash, headers = headers, snapshot = snapshot, preview = preview, region = region, url = url, volume_list = datavols)
     #Take out of backup mode
     if not preview:
         out=orautils.recover_database(oracleSid)
