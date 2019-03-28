@@ -248,7 +248,7 @@ def command_line():
     if arg['volList']:
         volList( force = force, fs_map_hash = fs_map_hash, headers = headers, json_volume_object = json_volume_object, region = region, url = url, volPattern = volPattern, volume = volume)
     elif arg['volCreate']:
-        volCreate( bandwidth = bandwidth, cidr = cidr, count = count, force = force, fs_map_hash = fs_map_hash, gigabytes = gigabytes, json_volume_object = json_volume_object, headers = headers, label = label, name = name, preview = preview, region = region, url = url, volPattern = volPattern, volume = volume)
+        volCreate( bandwidth = bandwidth, cidr = cidr, count = count, force = force, fs_map_hash = fs_map_hash, gigabytes = gigabytes, json_volume_object = json_volume_object, headers = headers, label = label, preview = preview, region = region, url = url, volPattern = volPattern, volume = volume)
     elif arg['volDelete']:
         volDelete( force = force,fs_map_hash = fs_map_hash,headers = headers, preview = preview, region = region, url = url, volPattern = volPattern, volume = volume)
     elif arg['snapList']:     
@@ -316,7 +316,6 @@ def volCreate(
             json_volume_object = None,
             headers = None,
             label = None,
-            name = None,
             preview = None,
             region = None,
             url = None,
@@ -324,19 +323,19 @@ def volCreate(
             volume = None
            ):
 
-    if name:
-        if gigabytes and bandwidth and cidr and name and region:
+    if volume:
+        if gigabytes and bandwidth and cidr and region:
             error = False 
             error_value = {}
    
-            if len(name) < 1:
+            if len(volume) < 1:
                 error = True
-                error_value['name_length'] = ('Volume Name length is too short: %s, names must be => 1 and <= 33 characters' % (len(name)))
-            if len(name) > 33:
+                error_value['name_length'] = ('Volume Name length is too short: %s, names must be => 1 and <= 33 characters' % (len(volume)))
+            if len(volume) > 33:
                 error = True
-                error_value['name_length'] = ('Volume Name length is too long: %s, names must be => 1 and <= 33 characters' % (len(name)))
-            for index in range(0,len(name)):
-                local_error = is_ord(my_string = name[index], position = index)
+                error_value['name_length'] = ('Volume Name length is too long: %s, names must be => 1 and <= 33 characters' % (len(volume)))
+            for index in range(0,len(volume)):
+                local_error = is_ord(my_string = volume[index], position = index)
                 if local_error == True:
                     error = True
                     error_value['name_illegal_character'] = 'Illegal char type'
@@ -368,12 +367,12 @@ def volCreate(
   
             if error == False: 
                 if count == 1:
-                    name = name
+                    volume = volume
                     volume_creation(bandwidth = bandwidthMB,
                                     cidr = cidr,
                                     headers = headers,
                                     label = label,
-                                    name = name,
+                                    volume = volume,
                                     preview = preview,
                                     quota_in_bytes = quotainbytes,
                                     region = region,
@@ -381,12 +380,12 @@ def volCreate(
                                     url = url)
                 else:
                     while count > 0:
-                        newname = ('%s-%s' % (name,count))
+                        newname = ('%s-%s' % (volume,count))
                         volume_creation(bandwidth = bandwidthMB,
                                         cidr = cidr,
                                         headers = headers,
                                         label = label,
-                                        name = newname,
+                                        volume = newname,
                                         preview = preview,
                                         quota_in_bytes = quotainbytes,
                                         region = region,
@@ -400,7 +399,7 @@ def volCreate(
         else:
             volCreate_error_message()
     else:   
-        print('The volCreate command resulted in an error.\tThe required flag --name was not specified.')
+        print('The volCreate command resulted in an error.\tThe required flag --volume was not specified.')
         volCreate_error_message()
 
 def volProtect(fs_map_hash = None):
@@ -1083,19 +1082,20 @@ def add_fs_info_for_vols_by_name(fs_hash = None,
 '''
 Issue call to create volume
 '''
-def volume_creation(bandwidth = None,
+def volume_creation(
+                    bandwidth = None,
                     cidr = None, 
                     headers = None,
                     label = None,
-                    name = None,
                     preview = None,
                     quota_in_bytes = None,
                     region = None,
                     servicelevel = None,
-                    url = None):
+                    url = None,
+                    volume = None):
     command =  'FileSystems'
-    data = {'name':name,
-        'creationToken':name,
+    data = {'volume':volume,
+        'creationToken':volume,
         'region':region,
         'serviceLevel':servicelevel,
         'quotaInBytes':quota_in_bytes,
@@ -1124,13 +1124,13 @@ def volume_creation(bandwidth = None,
         print('Volume Creation simulated:')
     else:
         print('Volume Creation submitted:')
-    print('\tname:%s\
+    print('\tvolume:%s\
           \n\tcreationToken:/%s\
           \n\tregion:%s\
           \n\tserviceLevel:%s\
           \n\tallocatedCapacityGB:%s\
           \n\tavailableBandwidthMB:%s'\
-          % (name,name,region,servicelevel_alt,int(quota_in_bytes) / 1000000000,bandwidth))
+          % (volume,volume,region,servicelevel_alt,int(quota_in_bytes) / 1000000000,bandwidth))
 
 '''
 Determine the best gigabytes and service level based upon input
