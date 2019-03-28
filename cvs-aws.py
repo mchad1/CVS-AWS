@@ -757,11 +757,11 @@ def snapKeepByStar(
                 #Record the number of snapshots in the volume
                 for index in range(0,len(fs_snap_hash[volume]['snapshots'])):
                     #If snapPattern is specified and snapshot is in the snapshot, load the snapshot into the hashes, don't track the rest
-                    if snapPattern and snapshot in fs_snap_hash[volume]['snapshots'][index]['snapshot']:
+                    if snapPattern and snapshot in fs_snap_hash[volume]['snapshots'][index]['name']:
                         #key = epoch, value = snapid
                         epoch_and_snap_id_hash[fs_snap_hash[volume]['snapshots'][index]['epochTime']] = fs_snap_hash[volume]['snapshots'][index]['snapshotId']
                         #key = epoch, value = snapshot
-                        epoch_and_snap_snapshot_hash[fs_snap_hash[volume]['snapshots'][index]['epochTime']] = fs_snap_hash[volume]['snapshots'][index]['snapshot']
+                        epoch_and_snap_snapshot_hash[fs_snap_hash[volume]['snapshots'][index]['epochTime']] = fs_snap_hash[volume]['snapshots'][index]['name']
                         #list of epoch
                         epoch_list.append(fs_snap_hash[volume]['snapshots'][index]['epochTime'])
                     #If snapPattern is not specified, load all snapshots into the two hashes
@@ -769,7 +769,7 @@ def snapKeepByStar(
                         #key = epoch, value = snapid
                         epoch_and_snap_id_hash[fs_snap_hash[volume]['snapshots'][index]['epochTime']] = fs_snap_hash[volume]['snapshots'][index]['snapshotId']
                         #key = epoch, value = snapshot
-                        epoch_and_snap_snapshot_hash[fs_snap_hash[volume]['snapshots'][index]['epochTime']] = fs_snap_hash[volume]['snapshots'][index]['snapshot']
+                        epoch_and_snap_snapshot_hash[fs_snap_hash[volume]['snapshots'][index]['epochTime']] = fs_snap_hash[volume]['snapshots'][index]['name']
                         #list of epoch
                         epoch_list.append(fs_snap_hash[volume]['snapshots'][index]['epochTime'])
                 #Sort the epoch list in place
@@ -876,7 +876,7 @@ def snapRevert(
                     for volume in fs_snap_hash.keys():
                         if volume_list and volume in volume_list or not volume_list:
                             for index in range(0,len(fs_snap_hash[volume]['snapshots'])):
-                                if fs_snap_hash[volume]['snapshots'][index]['snapshot'] == snapshot:
+                                if fs_snap_hash[volume]['snapshots'][index]['name'] == snapshot:
                                     snapshotId = fs_snap_hash[volume]['snapshots'][index]['snapshotId']
                                     fileSystemId = fs_map_hash[volume]['fileSystemId']
                                     command = 'FileSystems/' + fileSystemId + '/Revert'
@@ -1405,7 +1405,7 @@ def submit_snap_deletions(
         for volume in fs_snap_hash.keys():
             #Use this to record if we actually deleted any snapshots
             for index in range(0,len(fs_snap_hash[volume]['snapshots'])):
-                if snapshot == fs_snap_hash[volume]['snapshots'][index]['snapshot'] or snapPattern and snapshot in  fs_snap_hash[volume]['snapshots'][index]['snapshot']:
+                if snapshot == fs_snap_hash[volume]['snapshots'][index]['name'] or snapPattern and snapshot in  fs_snap_hash[volume]['snapshots'][index]['name']:
                     snapshotId = fs_snap_hash[volume]['snapshots'][index]['snapshotId']
                     fileSystemId = fs_map_hash[volume]['fileSystemId']
                     command = 'FileSystems/' + fileSystemId + '/Snapshots/' + snapshotId
@@ -1420,9 +1420,9 @@ def submit_snap_deletions(
                         error_check(body = json_snapshot_object,
                                     status_code = snapshot_status,
                                     url = url)
-                        print('Snapshot Deleton Submitted: Volume: %s  VolId: %s SnapName: %s SnapID: %s' % (volume, fileSystemId, fs_snap_hash[volume]['snapshots'][index]['snapshot'], snapshotId))
+                        print('Snapshot Deleton Submitted: Volume: %s  VolId: %s SnapName: %s SnapID: %s' % (volume, fileSystemId, fs_snap_hash[volume]['snapshots'][index]['name'], snapshotId))
                     else:
-                        print('Snapshot Deleton Simulated: Volume: %s  VolId: %s SnapName: %s SnapID: %s' % (volume, fileSystemId, fs_snap_hash[volume]['snapshots'][index]['snapshot'], snapshotId))
+                        print('Snapshot Deleton Simulated: Volume: %s  VolId: %s SnapName: %s SnapID: %s' % (volume, fileSystemId, fs_snap_hash[volume]['snapshots'][index]['name'], snapshotId))
                     tracking_deletions += 1 
         exit()
     if tracking_deletions == 0:
