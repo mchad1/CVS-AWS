@@ -4,7 +4,7 @@ usage: cvs-aws.py [-h]
     | --snapKeepByDays | --snapList | --snapRevert | --volCreate | --volDelete | --volList)
                   [--project PROJECT] [--preview] [--Force] [--volPattern]
                   [--snapPattern] [--volume VOLUME] [--region REGION]
-                  [--name NAME] [--gigabytes GIGABYTES]
+                  [--snapshot NAME] [--gigabytes GIGABYTES]
                   [--bandwidth BANDWIDTH] [--cidr CIDR] [--label LABEL]
                   [--count COUNT] [--configFile CONFIGFILE]
                   [--oracleSid ORACLESID]
@@ -46,16 +46,13 @@ usage: cvs-aws.py [-h]
     --snapPattern, -S   Search for snapshots using name as substring. Supports
                         snap*.
     --volume VOLUME, -v VOLUME
-                        Enter a volume name to search for, names must be
-                        between 16 and 33 characters in length
+                        Enter a volume name to search for
     --region REGION, -r REGION
                         Specify the region when performing creation
                         operations, specify only if different than that listed
                         already in the aws_cvs_config.json file. Supports
                         snapCreate and volCreate
-    --name NAME, -n NAME  Specify the object name to create. Supports snap* and
-                        volCreate. When used with volCreate, body must match
-                        [a-zA-Z][a-zA-Z0-9-]
+    --snapshot SNAPSHOT, -s SNAPSHOT  Specify the snapshot name to create. Supports snap* and
     --gigabytes GIGABYTES, -g GIGABYTES
                         Volume gigabytes in Gigabytes, value accepted between
                         100 and 100,000. Supports volCreate
