@@ -4,7 +4,7 @@ usage: cvs-aws.py [-h]
     | --snapKeepByDays | --snapList | --snapRevert | --volCreate | --volDelete | --volList)
                   [--project PROJECT] [--preview] [--Force] [--volPattern]
                   [--snapPattern] [--volume VOLUME] [--region REGION]
-                  [--name NAME] [--gigabytes GIGABYTES]
+                  [--snapshot NAME] [--gigabytes GIGABYTES]
                   [--bandwidth BANDWIDTH] [--cidr CIDR] [--label LABEL]
                   [--count COUNT] [--configFile CONFIGFILE]
                   [--oracleSid ORACLESID]
