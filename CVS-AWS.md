@@ -37,7 +37,7 @@ usage: cvs-aws.py [-h]
     --preview           If specfied, a try befor your buy simulation is run
                         rather than the actual command. Supports all delete
                         and create and Oracle commands.
-    --Force             If specfied, enables substring's to work *Delete and
+    --Force             If specfied, enables substrings to work *Delete and
                         Revert operations. Supports all *Delete operations as
                         well as snapRevert.
     --volPattern, -P    Search for volumes using name as substring. Supports
@@ -46,16 +46,14 @@ usage: cvs-aws.py [-h]
     --snapPattern, -S   Search for snapshots using name as substring. Supports
                         snap*.
     --volume VOLUME, -v VOLUME
-                        Enter a volume name to search for, names must be
-                        between 16 and 33 characters in length
+                        Enter a volume to control 
     --region REGION, -r REGION
                         Specify the region when performing creation
                         operations, specify only if different than that listed
                         already in the aws_cvs_config.json file. Supports
                         snapCreate and volCreate
-    --name NAME, -n NAME  Specify the object name to create. Supports snap* and
-                        volCreate. When used with volCreate, body must match
-                        [a-zA-Z][a-zA-Z0-9-]
+    --snapshot SNAPSHOT, -s SNAPSHOT 
+                        Specify the snapshot to control. Supports snap* and
     --gigabytes GIGABYTES, -g GIGABYTES
                         Volume gigabytes in Gigabytes, value accepted between
                         100 and 100,000. Supports volCreate
@@ -63,7 +61,8 @@ usage: cvs-aws.py [-h]
                         Volume bandwidth requirements in Megabytes per second.
                         If unknown enter 0 and maximum bandwidth is assigned.
                         Supports volCreate
-    --cidr CIDR, -c CIDR  IP Range used for export rules, the format needs to be
+    --cidr CIDR, -c CIDR  
+                        IP Range used for export rules, the format needs to be
                         similar to 0.0.0.0/0, supports volCreate
     --label LABEL, -l LABEL
                         Volume label. Supports volCreate
