@@ -323,6 +323,7 @@ def volCreate(
            ):
 
     if volume:
+        servicelevel_and_quota_hash = quota_and_servicelevel_parser()
         if gigabytes and bandwidth and cidr and region:
             error = False 
             error_value = {}
@@ -342,7 +343,7 @@ def volCreate(
             if local_error == True:
                 error = True
                 error_value['gigabytes_integer'] = 'Capacity was not a numeric value'
-            elif int(gigabytes) < 100 or int(gigabytes) > 100000:
+            elif int(gigabytes) < servicelevel_and_quota_hash['volsize']['min'] or int(gigabytes) > servicelevel_and_quota_hash['volsize']['max']:
                 error = True
                 error_value['size'] = 'Capacity was either smaller than 100GB or greater than 100,000GB'
             local_error = is_number(bandwidth)
