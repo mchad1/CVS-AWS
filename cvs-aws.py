@@ -352,7 +352,7 @@ def volCreate(
             elif int(bandwidth) < 0:
                 error = True
                 error_value['bw'] = ('Negative value entered: %s, requested values must be => 0.  If value == 0 or value > 3800 then maximum bandwidth will be assigned' % (bandwidth))
-            servicelevel, quotainbytes, bandwidthMB = servicelevel_and_quota_lookup(bwmb = bandwidth, gigabytes = gigabytes)
+            servicelevel, quotainbytes, bandwidthMB, storagecost = servicelevel_and_quota_lookup(bwmb = bandwidth, gigabytes = gigabytes)
             local_error = cidr_rule_check(cidr)
             if local_error == True:
                 error = True
@@ -376,6 +376,7 @@ def volCreate(
                                     quota_in_bytes = quotainbytes,
                                     region = region,
                                     servicelevel = servicelevel,
+                                    storagecost = storagecost,
                                     url = url)
                 else:
                     while count > 0:
@@ -389,6 +390,7 @@ def volCreate(
                                         quota_in_bytes = quotainbytes,
                                         region = region,
                                         servicelevel = servicelevel,
+                                        storagecost = storagecost,
                                         url = url)
                         count -= 1
             else:
@@ -1090,6 +1092,7 @@ def volume_creation(
                     quota_in_bytes = None,
                     region = None,
                     servicelevel = None,
+                    storagecost = None,
                     url = None,
                     volume = None):
     command =  'FileSystems'
@@ -1128,8 +1131,9 @@ def volume_creation(
           \n\tregion:%s\
           \n\tserviceLevel:%s\
           \n\tallocatedCapacityGB:%s\
-          \n\tavailableBandwidthMB:%s'\
-          % (volume,volume,region,servicelevel_alt,int(quota_in_bytes) / 1000000000,bandwidth))
+          \n\tavailableBandwidthMB:%s\
+          \n\tstorage cost: $%s'\
+          % (volume,volume,region,servicelevel_alt,int(quota_in_bytes) / 1000000000,bandwidth,storagecost))
 
 '''
 Determine the best gigabytes and service level based upon input
@@ -1151,14 +1155,15 @@ def servicelevel_and_quota_lookup(bwmb = None, gigabytes = None):
     extreme_bw_per_gb = float(servicelevel_and_quota_hash['bandwidth']['extreme'])
 
     '''
-    if bwmb == 0, then the user didn't know the bandwidth, so set to maximum which we've seen is 3800MB/s. 
+    if bwmb == 0, then the user didn't know the bandwidth, so set to maximum which we've seen is 4500MiB/s. 
     '''
-    if bwmb == 0 or bwmb > 4500:
-        bwmb = 4500 
+    if bwmb == 0 or bwmb > servicelevel_and_quota_hash['maxbw']:
+        bwmb = servicelevel_and_quota_hash['maxbw']
     '''
     convert mb to kb
     '''
     bwkb = bwmb * 1000.0
+
     
     '''
     gigabytes needed based upon bandwidth needs
@@ -1166,18 +1171,24 @@ def servicelevel_and_quota_lookup(bwmb = None, gigabytes = None):
     basic_gigabytes_by_bw = bwkb / basic_bw_per_gb
     if basic_gigabytes_by_bw < gigabytes:
         basic_cost = gigabytes * basic_cost_per_gb
+    elif basic_gigabytes_by_bw > float(servicelevel_and_quota_hash['volsize']['max']):
+        basic_cost = 9999999
     else:
         basic_cost = basic_gigabytes_by_bw * basic_cost_per_gb
 
     standard_gigabytes_by_bw = bwkb / standard_bw_per_gb
     if standard_gigabytes_by_bw  < gigabytes:
         standard_cost = gigabytes * standard_cost_per_gb
+    elif standard_gigabytes_by_bw > float(servicelevel_and_quota_hash['volsize']['max']):
+        standard_cost = 999999
     else:
         standard_cost = standard_gigabytes_by_bw * standard_cost_per_gb
 
     extreme_gigabytes_by_bw = bwkb / extreme_bw_per_gb
     if extreme_gigabytes_by_bw < gigabytes:
         extreme_cost = gigabytes * extreme_cost_per_gb
+    elif extreme_gigabytes_by_bw > float(servicelevel_and_quota_hash['volsize']['max']):
+        extreme_cost = 999999
     else:
         extreme_cost = extreme_gigabytes_by_bw * extreme_cost_per_gb
 
@@ -1203,9 +1214,11 @@ def servicelevel_and_quota_lookup(bwmb = None, gigabytes = None):
             '''
             gigabytes *= 1000000000
             bandwidthMB = int(bandwidthKB / 1000)
+            if bandwidthMB > servicelevel_and_quota_hash['maxbw']:
+                bandwidthMB = servicelevel_and_quota_hash['maxbw'] 
             break
 
-    return servicelevel, gigabytes, bandwidthMB
+    return servicelevel, gigabytes, bandwidthMB, lowest_price
 
 '''
 Calculate the bandwidth based upon passed in service level and quota
@@ -1267,7 +1280,7 @@ def volList_error_message():
 
 def volCreate_error_message():
     print('\nThe following volCreate flags are required:\
-           \n\t--snapshot | -n X\t\t\t\t#Name used for volume and export path\
+           \n\t--volume | -n X\t\t\t\t#Name used for volume and export path\
            \n\t--gigabytes | -g [0 < X <= 100,000]\t#Allocated volume capacity in Gigabyte\
            \n\t--bandwidth | -b [0 <= X <= 4500]\t#Requested maximum volume bandwidth in Megabytes\
            \n\t--cidr | -c 0.0.0.0/0\t\t\t#Network with acess to exported volume')
