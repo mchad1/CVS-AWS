@@ -1,2 +1,18 @@
-{ "prices":{ "basic":0.10, "standard":0.20, "extreme":0.30 },"bandwidth":{ "basic":16, "standard":64, "extreme":128 },"volsize":{ "min":100,"max":100000},"maxbw":4500}
+{
+    "prices":{
+        "basic":0.10,
+        "standard":0.20,
+        "extreme":0.30 },
+    "bandwidth":{ 
+        "basic":16, 
+        "standard":64,
+        "extreme":128 },
+    "volsize":{ 
+        "min":100,
+        "max":100000},
+    "maxseqread":4500,
+    "maxseqwrite":1800,
+    "maxseqread":4500,
+    "maxseqread":4500
+}
 

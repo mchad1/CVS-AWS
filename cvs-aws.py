@@ -1,3 +1,4 @@
+#!/usr/bin/python3
 import sys
 sys.path.append(sys.path[0] + "/lib")
 import argparse
@@ -71,6 +72,7 @@ def command_line():
     group.add_argument('--volCreate',action='store_const',const=True,)
     group.add_argument('--volDelete',action='store_const',const=True,)
     group.add_argument('--volList', action='store_const',const=True,)
+    group.add_argument('--volSizer', action='store_const',const=True,)
     parser.add_argument('--project','-p',type=str,help='Enter the project snapshot to interact with, otherwise the default project is selected')
     parser.add_argument('--preview', action='store_const',const=True,help='If specfied, a try befor your buy simulation is run rather than\
                                                                          the actual command. Supports all delete and create and Oracle commands.')
@@ -219,7 +221,7 @@ def command_line():
 
  
     
-    if arg['oracleRevert'] or arg['oracleBackup'] or arg['volList'] or arg['snapList'] or arg['snapCreate'] or arg['snapDelete'] or arg['volDelete'] or arg['volCreate'] or arg['snapRevert'] or arg['snapKeepByCount'] or arg['snapKeepByDays']:
+    if arg['oracleRevert'] or arg['oracleBackup'] or arg['volList'] or arg['snapList'] or arg['snapCreate'] or arg['snapDelete'] or arg['volDelete'] or arg['volCreate'] or arg['volSizer'] or arg['snapRevert'] or arg['snapKeepByCount'] or arg['snapKeepByDays']:
         #@# Create full fs hash containing all info
         volume_status, json_volume_object = submit_api_request(command = 'FileSystems',
                                                                direction = 'GET',
@@ -250,6 +252,8 @@ def command_line():
         volCreate( bandwidth = bandwidth, cidr = cidr, count = count, force = force, fs_map_hash = fs_map_hash, gigabytes = gigabytes, json_volume_object = json_volume_object, headers = headers, label = label, preview = preview, region = region, url = url, volPattern = volPattern, volume = volume)
     elif arg['volDelete']:
         volDelete( force = force,fs_map_hash = fs_map_hash,headers = headers, preview = preview, region = region, url = url, volPattern = volPattern, volume = volume)
+    elif arg['volSizer']:
+        volSizer( bandwidth = bandwidth, fs_map_hash = fs_map_hash, gigabytes = gigabytes, json_volume_object = json_volume_object)
     elif arg['snapList']:     
         snapList( force = force, fs_map_hash = fs_map_hash, headers = headers, json_volume_object = json_volume_object, snapshot = snapshot, region = region, url = url, volPattern = volPattern, snapPattern = snapPattern, volume = volume)
     elif arg['snapCreate']:
@@ -322,86 +326,98 @@ def volCreate(
             volume = None
            ):
 
-    if volume:
-        servicelevel_and_quota_hash = quota_and_servicelevel_parser()
-        if gigabytes and bandwidth and cidr and region:
-            error = False 
-            error_value = {}
-   
-            if len(volume) < 1:
-                error = True
-                error_value['snapshot_length'] = ('Volume Name length is too short: %s, snapshots must be => 1 and <= 33 characters' % (len(volume)))
-            if len(volume) > 33:
-                error = True
-                error_value['snapshot_length'] = ('Volume Name length is too long: %s, snapshots must be => 1 and <= 33 characters' % (len(volume)))
-            for index in range(0,len(volume)):
-                local_error = is_ord(my_string = volume[index], position = index)
-                if local_error == True:
-                    error = True
-                    error_value['snapshot_illegal_character'] = 'Illegal char type'
-            local_error = is_number(gigabytes)
-            if local_error == True:
-                error = True
-                error_value['gigabytes_integer'] = 'Capacity was not a numeric value'
-            elif int(gigabytes) < servicelevel_and_quota_hash['volsize']['min'] or int(gigabytes) > servicelevel_and_quota_hash['volsize']['max']:
-                error = True
-                error_value['size'] = 'Capacity was either smaller than 100GB or greater than 100,000GB'
-            local_error = is_number(bandwidth)
-            if local_error == True:
-                error = True
-                error_value['bw_integer'] = 'Bandwidth was not a numeric value'
-            elif int(bandwidth) < 0:
-                error = True
-                error_value['bw'] = ('Negative value entered: %s, requested values must be => 0.  If value == 0 or value > 3800 then maximum bandwidth will be assigned' % (bandwidth))
-            servicelevel, quotainbytes, bandwidthMB, storagecost = servicelevel_and_quota_lookup(bwmb = bandwidth, gigabytes = gigabytes)
-            local_error = cidr_rule_check(cidr)
-            if local_error == True:
-                error = True
-                error_value['cidr'] = ('Cidr rule is incorrect: %s, value must be in the form of X.X.X.X/X where all values for X are between 0 and 255' % (cidr))
-            if not count:
-                count = 1
-            if label:
-                label = label
-            else:
-                label = None
+    if not volume:   
+        print('The volCreate command resulted in an error.\tThe required flag --volume was not specified.')
+        volCreate_error_message()
+
+    servicelevel_and_quota_hash = quota_and_servicelevel_parser()
+    if gigabytes and bandwidth and cidr and region:
+        error = False 
+        error_value = {}
   
-            if error == False: 
-                if count == 1:
-                    volume = volume
+        #Working with volume name
+        if len(volume) < 1:
+            error = True
+            error_value['snapshot_length'] = ('Volume Name length is too short: %s, snapshots must be => 1 and <= 33 characters' % (len(volume)))
+        if len(volume) > 33:
+            error = True
+            error_value['snapshot_length'] = ('Volume Name length is too long: %s, snapshots must be => 1 and <= 33 characters' % (len(volume)))
+        for index in range(0,len(volume)):
+            local_error = is_ord(my_string = volume[index], position = index)
+            if local_error == True:
+                error = True
+                error_value['snapshot_illegal_character'] = 'Illegal char type'
+
+        #working with capacity
+        local_error = is_number(gigabytes)
+
+        if local_error == True:
+            error = True
+            error_value['gigabytes_integer'] = 'Capacity was not a numeric value'
+        elif int(gigabytes) < servicelevel_and_quota_hash['volsize']['min']:
+            error = True
+            error_value['size'] = ('Capacity was smaller than %s' % ( servicelevel_and_quota_hash['volsize']['min'] ))
+        elif int(gigabytes) > servicelevel_and_quota_hash['volsize']['max']:
+            error = True
+            error_value['size'] = ('Capacity was larger than %s' % ( servicelevel_and_quota_hash['volsize']['min']))
+
+        local_error = is_number(bandwidth)
+        if local_error == True:
+            error = True
+            error_value['bw_integer'] = 'Bandwidth was not a numeric value'
+        elif int(bandwidth) < 0:
+            error = True
+            error_value['bw'] = ('Negative value entered: %s, requested values must be => 0.  If value == 0 or value > %s then maximum bandwidth will be assigned' % (bandwidth,servicelevel_and_quota_hash['maxseqread']))
+        if error == False:
+            servicelevel, quotainbytes, bandwidthMB, storagecost = servicelevel_and_quota_lookup(bwmb = bandwidth, gigabytes = gigabytes)
+
+        #Working with errata
+        local_error = cidr_rule_check(cidr)
+        if local_error == True:
+            error = True
+            error_value['cidr'] = ('Cidr rule is incorrect: %s, value must be in the form of X.X.X.X/X where all values for X are between 0 and 255' % (cidr))
+        if not count:
+            count = 1
+        if label:
+            label = label
+        else:
+            label = None
+
+        #Creating volumes
+        if error == False: 
+            if count == 1:
+                volume = volume
+                volume_creation(bandwidth = bandwidthMB,
+                                cidr = cidr,
+                                headers = headers,
+                                label = label,
+                                volume = volume,
+                                preview = preview,
+                                quota_in_bytes = quotainbytes,
+                                region = region,
+                                servicelevel = servicelevel,
+                                storagecost = storagecost,
+                                url = url)
+            else:
+                while count > 0:
+                    newsnapshot = ('%s-%s' % (volume,count))
                     volume_creation(bandwidth = bandwidthMB,
                                     cidr = cidr,
                                     headers = headers,
                                     label = label,
-                                    volume = volume,
+                                    volume = newsnapshot,
                                     preview = preview,
                                     quota_in_bytes = quotainbytes,
                                     region = region,
                                     servicelevel = servicelevel,
                                     storagecost = storagecost,
                                     url = url)
-                else:
-                    while count > 0:
-                        newsnapshot = ('%s-%s' % (volume,count))
-                        volume_creation(bandwidth = bandwidthMB,
-                                        cidr = cidr,
-                                        headers = headers,
-                                        label = label,
-                                        volume = newsnapshot,
-                                        preview = preview,
-                                        quota_in_bytes = quotainbytes,
-                                        region = region,
-                                        servicelevel = servicelevel,
-                                        storagecost = storagecost,
-                                        url = url)
-                        count -= 1
-            else:
-                print('The volCreate command failed, see the following json output for the cause:\n')
-                pretty_hash(error_value)
-                volCreate_error_message()
+                    count -= 1
         else:
+            print('The volCreate command failed, see the following json output for the cause:\n')
+            pretty_hash(error_value)
             volCreate_error_message()
-    else:   
-        print('The volCreate command resulted in an error.\tThe required flag --volume was not specified.')
+    else:
         volCreate_error_message()
 
 def volProtect(fs_map_hash = None):
@@ -466,6 +482,61 @@ def volDelete(
         print('The volDelete command resulted in an error.\tThe required flag --volume was not specified.')
         volDelete_error_message()
 
+def volSizer( bandwidth = None, 
+              fs_map_hash = None, 
+              gigabytes = None, 
+              json_volume_object = None):
+
+    servicelevel_and_quota_hash = quota_and_servicelevel_parser()
+    error = False 
+    error_value = {}
+    if gigabytes and bandwidth:
+  
+        #working with capacity
+        local_error = is_number(gigabytes)
+
+        if local_error == True:
+            error = True
+            error_value['gigabytes_integer'] = 'Capacity was not a numeric value'
+        elif int(gigabytes) < servicelevel_and_quota_hash['volsize']['min']:
+            error = True
+            error_value['size'] = ('Capacity was smaller than %s' % ( servicelevel_and_quota_hash['volsize']['min']))
+        elif int(gigabytes) > servicelevel_and_quota_hash['volsize']['max']:
+            error = True
+            error_value['size'] = ('Capacity was larger than %s' % ( servicelevel_and_quota_hash['volsize']['max']))
+
+        #working with bandwidth
+        local_error = is_number(bandwidth)
+        if local_error == True:
+            error = True
+            error_value['bw_integer'] = 'Bandwidth was not a numeric value'
+        elif int(bandwidth) < 0:
+            error = True
+            error_value['bw'] = ('Negative value entered: %s, requested values must be => 0.  If value == 0 or value > %s then maximum bandwidth will be assigned' % (bandwidth,servicelevel_and_quota_hash['maxseqread']))
+        if error == False:
+            servicelevel, quotainbytes, bandwidthMB, storagecost = servicelevel_and_quota_lookup(bwmb = bandwidth, gigabytes = gigabytes)
+        else:
+            print('The volSizer command failed, see the following json output for the cause:\n')
+            pretty_hash(error_value)
+            volSizer_error_message()
+     
+        if servicelevel == 'basic':
+            servicelevel_alt = 'standard'
+        elif servicelevel == 'standard':
+            servicelevel_alt = 'premium'
+        elif servicelevel == 'extreme':
+            servicelevel_alt = 'extreme'
+        print('\tvolume sizing reccomendation:\
+              \n\tserviceLevel:%s\
+              \n\tallocatedCapacityGB:%s\
+              \n\tavailableBandwidthMB:%s\
+              \n\tstorage cost: $%s'\
+              % (servicelevel_alt,int(quotainbytes) / 1000000000,bandwidthMB,storagecost))
+
+    else:
+        print('The volSizer command failed, see the following json output for the cause:\n')
+        pretty_hash(error_value)
+        volSizer_error_message()
 
         ##########################################################
         #                     Snapshot Commands
@@ -1158,8 +1229,8 @@ def servicelevel_and_quota_lookup(bwmb = None, gigabytes = None):
     '''
     if bwmb == 0, then the user didn't know the bandwidth, so set to maximum which we've seen is 4500MiB/s. 
     '''
-    if bwmb == 0 or bwmb > servicelevel_and_quota_hash['maxbw']:
-        bwmb = servicelevel_and_quota_hash['maxbw']
+    if bwmb == 0 or bwmb > servicelevel_and_quota_hash['maxseqread']:
+        bwmb = servicelevel_and_quota_hash['maxseqread']
     '''
     convert mb to kb
     '''
@@ -1215,8 +1286,8 @@ def servicelevel_and_quota_lookup(bwmb = None, gigabytes = None):
             '''
             gigabytes *= 1000000000
             bandwidthMB = int(bandwidthKB / 1000)
-            if bandwidthMB > servicelevel_and_quota_hash['maxbw']:
-                bandwidthMB = servicelevel_and_quota_hash['maxbw'] 
+            if bandwidthMB > servicelevel_and_quota_hash['maxseqread']:
+                bandwidthMB = servicelevel_and_quota_hash['maxseqread'] 
             break
 
     return servicelevel, gigabytes, bandwidthMB, lowest_price
@@ -1297,6 +1368,14 @@ def volDelete_error_message():
     print('\nThe following vol deletion command line options are supported:\
            \n\tvolDelete --snapshot X --volume <volume> [--preview]\t\t\t#Delete volume X\
            \n\tvolDelete --snapshot X --volume <volume> --volPattern --Force [--preview]\t#Delete volumes with snapshots containing substring X')
+    exit()
+
+def volSizer_error_message():
+    print('\nThe following volSizer flags are required:\
+           \n\t--gigabytes | -g [0 < X <= 100,000]\t#Allocated volume capacity in Gigabyte\
+           \n\t--bandwidth | -b [0 <= X <= 4500]\t#Requested maximum volume bandwidth in Megabytes')
+    print('\nThe following flags are optional:\
+           \n\t--iops | -i [ 1 <= X]\t\t\t#If specified, X volumes will be created')
     exit()
 
 ##########################################################
