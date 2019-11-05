@@ -220,7 +220,10 @@ def command_line():
 
  
     
-    if arg['oracleRevert'] or arg['oracleBackup'] or arg['volList'] or arg['snapList'] or arg['snapCreate'] or arg['snapDelete'] or arg['volDelete'] or arg['volCreate'] or arg['volSizer'] or arg['snapRevert'] or arg['snapKeepByCount'] or arg['snapKeepByDays']:
+    if arg['oracleRevert'] or arg['oracleBackup'] or arg['volList'] or arg['snapList'] or arg['snapCreate']\
+       or arg['snapDelete'] or arg['volDelete'] or arg['volCreate'] or arg['volSizer'] or arg['snapRevert']\
+       or arg['snapKeepByCount'] or arg['snapKeepByDays']:
+
         #@# Create full fs hash containing all info
         volume_status, json_volume_object = submit_api_request(command = 'FileSystems',
                                                                direction = 'GET',
@@ -246,27 +249,128 @@ def command_line():
             fs_map_hash = create_export_to_fsid_hash(json_object = json_volume_object, region = region)
 
     if arg['volList']:
-        volList( force = force, fs_map_hash = fs_map_hash, headers = headers, json_volume_object = json_volume_object, region = region, url = url, volPattern = volPattern, volume = volume)
+        volList( force = force,
+                 fs_map_hash = fs_map_hash,
+                 headers = headers,
+                 json_volume_object = json_volume_object,
+                 region = region,
+                 url = url,
+                 volPattern = volPattern,
+                 volume = volume)
+
     elif arg['volCreate']:
-        volCreate( bandwidth = bandwidth, cidr = cidr, count = count, force = force, fs_map_hash = fs_map_hash, gigabytes = gigabytes, json_volume_object = json_volume_object, headers = headers, label = label, preview = preview, region = region, url = url, volPattern = volPattern, volume = volume)
+        volCreate( bandwidth = bandwidth,
+                   cidr = cidr, 
+                   count = count, 
+                   force = force, 
+                   fs_map_hash = fs_map_hash,
+                   gigabytes = gigabytes,
+                   json_volume_object = json_volume_object,
+                   headers = headers,
+                   label = label,
+                   preview = preview,
+                   region = region,
+                   url = url,
+                   volPattern = volPattern,
+                   volume = volume)
+
     elif arg['volDelete']:
-        volDelete( force = force,fs_map_hash = fs_map_hash,headers = headers, preview = preview, region = region, url = url, volPattern = volPattern, volume = volume)
+        volDelete( force = force,
+                   fs_map_hash = fs_map_hash,
+                   headers = headers,
+                   preview = preview,
+                   region = region,
+                   url = url, 
+                   volPattern = volPattern,
+                   volume = volume)
+
     elif arg['volSizer']:
-        volSizer( bandwidth = bandwidth, fs_map_hash = fs_map_hash, gigabytes = gigabytes, json_volume_object = json_volume_object)
+        volSizer( bandwidth = bandwidth,
+                  fs_map_hash = fs_map_hash,
+                  gigabytes = gigabytes,
+                  json_volume_object = json_volume_object)
+
     elif arg['snapList']:     
-        snapList( force = force, fs_map_hash = fs_map_hash, headers = headers, json_volume_object = json_volume_object, snapshot = snapshot, region = region, url = url, volPattern = volPattern, snapPattern = snapPattern, volume = volume)
+        snapList( force = force,
+                  fs_map_hash = fs_map_hash,
+                  headers = headers,
+                  json_volume_object = json_volume_object,
+                  snapshot = snapshot,
+                  region = region,
+                  url = url,
+                  volPattern = volPattern,
+                  snapPattern = snapPattern,
+                  volume = volume)
+
     elif arg['snapCreate']:
-        snapCreate( force = force, fs_map_hash = fs_map_hash, headers = headers, snapshot = snapshot, preview = preview, region = region, url = url, volPattern = volPattern, volume = volume)
+        snapCreate( force = force,
+                    fs_map_hash = fs_map_hash,
+                    headers = headers,
+                    snapshot = snapshot,
+                    preview = preview,
+                    region = region,
+                    url = url,
+                    volPattern = volPattern,
+                    volume = volume)
+
     elif arg['snapDelete']:
-        snapDelete( force = force, fs_map_hash = fs_map_hash, headers = headers, snapshot = snapshot, preview = preview, region = region, snapPattern = snapPattern, url = url, volPattern = volPattern, volume = volume)
+        snapDelete( force = force,
+                    fs_map_hash = fs_map_hash,
+                    headers = headers,
+                    snapshot = snapshot,
+                    preview = preview,
+                    region = region,
+                    snapPattern = snapPattern,
+                    url = url,
+                    volPattern = volPattern,
+                    volume = volume)
+
     elif arg['snapKeepByCount'] or arg['snapKeepByDays']:
-        snapKeepByStar(count = count, force = force, fs_map_hash = fs_map_hash, headers = headers, snapshot = snapshot, preview = preview, region = region, snapPattern = snapPattern, snapKeepByDays = snapKeepByDays, snapKeepByCount = snapKeepByCount, url = url, volPattern = volPattern, volume = volume)
+        snapKeepByStar(count = count,
+                       force = force,
+                       fs_map_hash = fs_map_hash,
+                       headers = headers,
+                       snapshot = snapshot,
+                       preview = preview,
+                       region = region,
+                       snapPattern = snapPattern,
+                       snapKeepByDays = snapKeepByDays,
+                       snapKeepByCount = snapKeepByCount,
+                       url = url,
+                       volPattern = volPattern,
+                       volume = volume)
+
     elif arg['snapRevert']:
-        snapRevert(force = force, fs_map_hash = fs_map_hash, headers = headers, snapshot = snapshot, preview = preview, region = region, url = url, volPattern = volPattern, volume = volume)
+        snapRevert(force = force,
+                   fs_map_hash = fs_map_hash,
+                   headers = headers,
+                   snapshot = snapshot,
+                   preview = preview,
+                   region = region,
+                   url = url,
+                   volPattern = volPattern,
+                   volume = volume)
+
     elif arg['oracleBackup']:
-        oracle_hot_backup(configFile = configFile, fs_map_hash = fs_map_hash, headers = headers, oracleSid = oracleSid, preview = preview, project = project, region = region, url = url)
+        oracle_hot_backup(configFile = configFile,
+                          fs_map_hash = fs_map_hash,
+                          headers = headers,
+                          oracleSid = oracleSid,
+                          preview = preview,
+                          project = project,
+                          region = region,
+                          url = url)
+
     elif arg['oracleRevert']:
-        oracle_revert_database(configFile = configFile, fs_map_hash = fs_map_hash, headers = headers, snapshot = snapshot, oracleSid = oracleSid, preview = preview, project = project, region = region, url = url)
+        oracle_revert_database(configFile = configFile,
+                               fs_map_hash = fs_map_hash,
+                               headers = headers,
+                               snapshot = snapshot,
+                               oracleSid = oracleSid,
+                               preview = preview,
+                               project = project,
+                               region = region,
+                               url = url)
         
         ##########################################################
         #                      Volume Commands
@@ -366,7 +470,9 @@ def volCreate(
             error_value['bw_integer'] = 'Bandwidth was not a numeric value'
         elif int(bandwidth) < 0:
             error = True
-            error_value['bw'] = ('Negative value entered: %s, requested values must be => 0.  If value == 0 or value > %s then maximum bandwidth will be assigned' % (bandwidth,servicelevel_and_quota_hash['maxseqread']))
+            error_value['bw'] = ('Negative value entered: %s, requested values must be => 0. \
+                                 If value == 0 or value > %s then maximum bandwidth will be assigned' \
+                                 % (bandwidth,servicelevel_and_quota_hash['maxseqread']))
         if error == False:
             servicelevel, quotainbytes, bandwidthMB, storagecost = servicelevel_and_quota_lookup(bwmb = bandwidth, gigabytes = gigabytes)
 
@@ -374,7 +480,8 @@ def volCreate(
         local_error = cidr_rule_check(cidr)
         if local_error == True:
             error = True
-            error_value['cidr'] = ('Cidr rule is incorrect: %s, value must be in the form of X.X.X.X/X where all values for X are between 0 and 255' % (cidr))
+            error_value['cidr'] = ('Cidr rule is incorrect: %s, value must be in the form of X.X.X.X/X where \
+                                   all values for X are between 0 and 255' % (cidr))
         if not count:
             count = 1
         if label:
@@ -511,7 +618,9 @@ def volSizer( bandwidth = None,
             error_value['bw_integer'] = 'Bandwidth was not a numeric value'
         elif int(bandwidth) < 0:
             error = True
-            error_value['bw'] = ('Negative value entered: %s, requested values must be => 0.  If value == 0 or value > %s then maximum bandwidth will be assigned' % (bandwidth,servicelevel_and_quota_hash['maxseqread']))
+            error_value['bw'] = ('Negative value entered: %s, requested values must be => 0.\
+                                 If value == 0 or value > %s then maximum bandwidth will be assigned' %\
+                                 (bandwidth,servicelevel_and_quota_hash['maxseqread']))
         if error == False:
             servicelevel, quotainbytes, bandwidthMB, storagecost = servicelevel_and_quota_lookup(bwmb = bandwidth, gigabytes = gigabytes)
         else:
@@ -1303,6 +1412,7 @@ def bandwidth_calculator(servicelevel = None, quotaInBytes = None):
     if servicelevel in servicelevel_and_quota_hash['bandwidth'].keys():
         capacityGB = quotaInBytes / 1000000000
         bandwidthMB = (capacityGB * servicelevel_and_quota_hash['bandwidth'][servicelevel]) / 1000
+        #print('capacityGB: %s, servicelevel:%s, servicelevelbw: %s' % (capacityGB, servicelevel,servicelevel_and_quota_hash['bandwidth'][servicelevel]))
     else:
         bandwidthMB = None
         capacityGB = None
