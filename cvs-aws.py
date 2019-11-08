@@ -1240,16 +1240,16 @@ def add_fs_info_for_vols_by_snapshot(fs_hash = None,
                                  region = None,
                                  url = None):
     for attribute in json_object[fs_map_hash[mount]['index']].keys():
-       fs_hash[mount][attribute] = json_object[fs_map_hash[mount]['index']][attribute]
-       if attribute == 'fileSystemId':
-           extract_mount_target_info_for_vols_by_snapshot(fs_hash = fs_hash,
-                                                      fileSystemId = fs_hash[mount][attribute],
-                                                      headers = headers,
-                                                      mount = mount,
-                                                      region = region,
-                                                      url = url)
-       if attribute == 'created':
-           fs_hash[mount]['epochTime'] = date_to_epoch(created = fs_hash[mount][attribute])
+        fs_hash[mount][attribute] = json_object[fs_map_hash[mount]['index']][attribute]
+        if attribute == 'fileSystemId':
+            extract_mount_target_info_for_vols_by_snapshot(fs_hash = fs_hash,
+                                                       	  fileSystemId = fs_hash[mount][attribute],
+                                                       	  headers = headers,
+                                                       	  mount = mount,
+                                                       	  region = region,
+                                                       	  url = url)
+        if attribute == 'created':
+            fs_hash[mount]['epochTime'] = date_to_epoch(created = fs_hash[mount][attribute])
 
     bandwidthMB, capacityGB = bandwidth_calculator(servicelevel = fs_hash[mount]['serviceLevel'],
                                                    quotaInBytes = int(fs_hash[mount]['quotaInBytes']))
@@ -1257,8 +1257,8 @@ def add_fs_info_for_vols_by_snapshot(fs_hash = None,
         fs_hash[mount]['allocatedCapacityGB'] = capacityGB
         fs_hash[mount]['availableBandwidthMB'] = bandwidthMB
         fs_hash[mount].pop('quotaInBytes')
-        
-    
+   
+
     
 '''
 Issue call to create volume
@@ -1513,11 +1513,13 @@ def extract_mount_target_info_for_vols_by_snapshot(fs_hash = None,
     if len(json_mountarget_object) > 0:
         for attribute in json_mountarget_object[0]: 
             fs_hash[mount][attribute] = json_mountarget_object[0][attribute]
-    else:
-        if fs_hash[mount]['lifeCycleStateDetails'] == 'Creation in progress':
-            fs_hash[mount]['MountTarget'] = 'Creating: No Mount Target Exists'
-        else:
-            fs_hash[mount]['MountTarget'] = 'Error: No Mount Target Exists'
+    
+    #else:
+    #    fs_hash[mount]['MountTarget'] = 'Creating: No Mount Target Exists'
+        #if fs_hash[mount]['lifeCycleStateDetails'] == 'Creation in progress':
+        #    fs_hash[mount]['MountTarget'] = 'Creating: No Mount Target Exists'
+        #else:
+        #    fs_hash[mount]['MountTarget'] = 'Error: No Mount Target Exists'
 
 
 

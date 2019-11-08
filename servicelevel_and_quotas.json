@@ -12,7 +12,7 @@
         "max":100000},
     "maxseqread":4500,
     "maxseqwrite":1800,
-    "maxseqread":4500,
-    "maxseqread":4500
+    "maxrndread":4500,
+    "maxrndwrit":4500
 }
 
