@@ -628,9 +628,9 @@ def volSizer( bandwidth = None,
             pretty_hash(error_value)
             volSizer_error_message()
      
-        if servicelevel == 'basic':
+        if servicelevel == 'standard':
             servicelevel_alt = 'standard'
-        elif servicelevel == 'standard':
+        elif servicelevel == 'premium':
             servicelevel_alt = 'premium'
         elif servicelevel == 'extreme':
             servicelevel_alt = 'extreme'
@@ -1296,9 +1296,9 @@ def volume_creation(
                     status_code = volume_status,
                     url = url)
     
-    if servicelevel == 'basic':
+    if servicelevel == 'standard':
         servicelevel_alt = 'standard'
-    elif servicelevel == 'standard':
+    elif servicelevel == 'premium':
         servicelevel_alt = 'premium'
     elif servicelevel == 'extreme':
         servicelevel_alt = 'extreme'
@@ -1326,12 +1326,12 @@ def servicelevel_and_quota_lookup(bwmb = None, gigabytes = None):
 
     bwmb = float(bwmb)
     gigabytes = float(gigabytes)
-    basic_cost_per_gb = float(servicelevel_and_quota_hash['prices']['basic'])
     standard_cost_per_gb = float(servicelevel_and_quota_hash['prices']['standard'])
+    premium_cost_per_gb = float(servicelevel_and_quota_hash['prices']['premium'])
     extreme_cost_per_gb = float(servicelevel_and_quota_hash['prices']['extreme'])
 
-    basic_bw_per_gb = float(servicelevel_and_quota_hash['bandwidth']['basic'])
     standard_bw_per_gb = float(servicelevel_and_quota_hash['bandwidth']['standard'])
+    premium_bw_per_gb = float(servicelevel_and_quota_hash['bandwidth']['premium'])
     extreme_bw_per_gb = float(servicelevel_and_quota_hash['bandwidth']['extreme'])
 
     '''
@@ -1348,21 +1348,21 @@ def servicelevel_and_quota_lookup(bwmb = None, gigabytes = None):
     '''
     gigabytes needed based upon bandwidth needs
     '''
-    basic_gigabytes_by_bw = bwkb / basic_bw_per_gb
-    if basic_gigabytes_by_bw < gigabytes:
-        basic_cost = gigabytes * basic_cost_per_gb
-    elif basic_gigabytes_by_bw > float(servicelevel_and_quota_hash['volsize']['max']):
-        basic_cost = 9999999
-    else:
-        basic_cost = basic_gigabytes_by_bw * basic_cost_per_gb
-
     standard_gigabytes_by_bw = bwkb / standard_bw_per_gb
-    if standard_gigabytes_by_bw  < gigabytes:
+    if standard_gigabytes_by_bw < gigabytes:
         standard_cost = gigabytes * standard_cost_per_gb
     elif standard_gigabytes_by_bw > float(servicelevel_and_quota_hash['volsize']['max']):
-        standard_cost = 999999
+        standard_cost = 9999999
     else:
         standard_cost = standard_gigabytes_by_bw * standard_cost_per_gb
+
+    premium_gigabytes_by_bw = bwkb / premium_bw_per_gb
+    if premium_gigabytes_by_bw  < gigabytes:
+        premium_cost = gigabytes * premium_cost_per_gb
+    elif premium_gigabytes_by_bw > float(servicelevel_and_quota_hash['volsize']['max']):
+        premium_cost = 999999
+    else:
+        premium_cost = premium_gigabytes_by_bw * premium_cost_per_gb
 
     extreme_gigabytes_by_bw = bwkb / extreme_bw_per_gb
     if extreme_gigabytes_by_bw < gigabytes:
@@ -1375,9 +1375,9 @@ def servicelevel_and_quota_lookup(bwmb = None, gigabytes = None):
     '''
     calculate right service level and gigabytes based upon cost
     '''
-    cost_hash = {'basic':basic_cost,'standard':standard_cost,'extreme':extreme_cost}
-    capacity_hash = {'basic':basic_gigabytes_by_bw,'standard':standard_gigabytes_by_bw,'extreme':extreme_gigabytes_by_bw}
-    bw_hash = {'basic':basic_bw_per_gb,'standard':standard_bw_per_gb,'extreme':extreme_bw_per_gb}
+    cost_hash = {'standard':standard_cost,'premium':premium_cost,'extreme':extreme_cost}
+    capacity_hash = {'standard':standard_gigabytes_by_bw,'premium':premium_gigabytes_by_bw,'extreme':extreme_gigabytes_by_bw}
+    bw_hash = {'standard':standard_bw_per_gb,'premium':premium_bw_per_gb,'extreme':extreme_bw_per_gb}
     lowest_price = min(cost_hash.values())
     for key in cost_hash.keys():
         if cost_hash[key] == lowest_price:

@@ -1,7 +1,7 @@
 {
     "prices":{
-        "basic":0.10,
-        "standard":0.20,
+        "standard":0.10,
+        "premium":0.20,
         "extreme":0.30 },
     "bandwidth":{ 
         "standard":16, 
